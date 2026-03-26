@@ -1,4 +1,5 @@
 exports.handler = async function () {
+
   const apiKey = process.env.AISSTREAM_API_KEY;
 
   if (!apiKey) {
@@ -12,6 +13,7 @@ exports.handler = async function () {
   }
 
   try {
+
     const response = await fetch(
       "https://stream.aisstream.io/v0/ships",
       {
@@ -31,7 +33,21 @@ exports.handler = async function () {
       }
     );
 
-    const data = await response.json();
+    const text = await response.text();
+
+    if (!text) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          ok: true,
+          source: "live",
+          vessel_count: 0,
+          vessels: []
+        })
+      };
+    }
+
+    const data = JSON.parse(text);
 
     return {
       statusCode: 200,
@@ -43,7 +59,10 @@ exports.handler = async function () {
       })
     };
 
-  } catch (error) {
+  }
+
+  catch (error) {
+
     return {
       statusCode: 500,
       body: JSON.stringify({
@@ -51,5 +70,7 @@ exports.handler = async function () {
         error: error.message
       })
     };
+
   }
+
 };
