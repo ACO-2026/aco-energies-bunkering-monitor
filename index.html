@@ -1210,9 +1210,9 @@ async function saveSettings() {
     const res  = await fetch(url);
     const data = await res.json();
 
-    if (data.success) {
+    if (res.ok && data && data.ok === true) {
       result.style.color   = 'var(--green)';
-      result.textContent   = `✅ LIVE CONNECTION SUCCESS — ${data.vessel_count} vessels returned for Port Said. Dashboard switching to live mode.`;
+      result.textContent = `✅ LIVE CONNECTION SUCCESS — source: ${data.source || 'live'}, vessels returned: ${data.vessel_count ?? 0}`;
       setApiStatus('live', 'LIVE AIS');
       isLive = true;
     } else if (data.demo_mode) {
