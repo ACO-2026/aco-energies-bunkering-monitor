@@ -925,7 +925,7 @@ async function fetchVessels() {
       const res  = await fetch(url);
       const data = await res.json();
 
-      if (data.success && Array.isArray(data.vessels)) {
+   if (res.ok && data && data.ok === true && Array.isArray(data.vessels)) {
         // Apply scoring to live vessels
         const scored = data.vessels.map(v => {
           const sc = scoreVessel(v);
@@ -939,7 +939,8 @@ async function fetchVessels() {
           };
         });
         liveVessels = [...liveVessels, ...scored];
-        setApiStatus('live', `LIVE AIS · ${data.vessel_count} vessels`);
+        setApiStatus('live', `LIVE AIS • ${data.vessel_count ?? 0} vessels`);
+        localStorage.setItem('ais_status', 'live');
         isLive = true;
       } else if (data.demo_mode) {
         setApiStatus('demo', 'DEMO MODE');
@@ -1174,6 +1175,12 @@ function switchTab(id, btn) {
   document.getElementById('tp-'+id).classList.add('on');
   btn.classList.add('on');
 }
+   const savedAisStatus = localStorage.getItem('ais_status');
+
+if (savedAisStatus === 'live') {
+  setApiStatus('live', 'LIVE AIS');
+}
+   
 
 // ════════════════════════════════════════════════════
 //  SETTINGS MODAL
