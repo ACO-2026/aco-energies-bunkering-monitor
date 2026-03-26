@@ -11,12 +11,45 @@ exports.handler = async function () {
     };
   }
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      ok: true,
-      source: "live",
-      message: "AISSTREAM_API_KEY detected"
-    })
-  };
+  try {
+    const response = await fetch(
+      "https://stream.aisstream.io/v0/ships",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": apiKey
+        },
+        body: JSON.stringify({
+          boundingBoxes: [
+            [
+              [31.5, 29.5],
+              [33.5, 31.5]
+            ]
+          ]
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        ok: true,
+        source: "live",
+        vessel_count: Array.isArray(data) ? data.length : 0,
+        vessels: data
+      })
+    };
+
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        ok: false,
+        error: error.message
+      })
+    };
+  }
 };
