@@ -1189,6 +1189,13 @@ function switchTab(id, btn) {
 
 if (savedAisStatus === 'live') {
   setApiStatus('live', 'LIVE AIS');
+} else {
+  setApiStatus('demo', 'DEMO');
+}
+   const savedAisStatus = localStorage.getItem('ais_status');
+
+if (savedAisStatus === 'live') {
+  setApiStatus('live', 'LIVE AIS');
 }
    
 
