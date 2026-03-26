@@ -25,8 +25,8 @@ exports.handler = async function () {
         body: JSON.stringify({
           boundingBoxes: [
             [
-              [31.5, 29.5],
-              [33.5, 31.5]
+              [29.0, 27.0],
+              [35.5, 33.5]
             ]
           ]
         })
