@@ -534,16 +534,6 @@ display:flex;align-items:flex-start;gap:12px;
     </div>
   </div>
 
-  <script>
-    // Restore AIS status from previous successful test
-    const savedAisStatus = localStorage.getItem('ais_status');
-     
-  if (savedAisStatus === 'live') {
-    setApiStatus('live', 'LIVE AIS');
-  } else {
-    setApiStatus('demo', 'DEMO');
-  }
-</script>
   <!-- TABS -->
 
   <div class="tab-bar">
