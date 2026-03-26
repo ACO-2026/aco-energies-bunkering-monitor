@@ -452,7 +452,7 @@ display:flex;align-items:flex-start;gap:12px;
     <span class="t-item"><span class="t-lbl">PORT SAID VLSFO</span><span class="t-val">$940/mt</span><span class="t-up">★ BEST PRICE</span></span><span class="t-sep">◆</span>
     <span class="t-item"><span class="t-lbl">MINERVA FILTER</span><span class="t-val">ACTIVE</span><span class="t-up" id="tk-excl">108 NAMES EXCLUDED</span></span><span class="t-sep">◆</span>
     <span class="t-item"><span class="t-lbl">ELIGIBLE STEMS</span><span class="t-val" id="tk-elig">14</span><span class="t-up">↑ OLD DASHBOARD HAD 2</span></span><span class="t-sep">◆</span>
-    <span class="t-item"><span class="t-lbl">AIS FEED</span><span class="t-val" id="tk-ais">DEMO MODE</span><span class="t-up">SET API KEY FOR LIVE</span></span><span class="t-sep">◆</span>
+    <span class="t-item"><span class="t-lbl">AIS FEED</span><span class="t-val" id="tk-ais">DEMO MODE</span><span class="t-up">Set API key for live</span></span><span class="t-sep">◆</span>
     <span class="t-item"><span class="t-lbl">CAPE ARB</span><span class="t-val">$540/mt OVER PORT SAID</span><span class="t-up">$10.8M ON 20K STEM</span></span><span class="t-sep">◆</span>
     <span class="t-item"><span class="t-lbl">HORMUZ</span><span class="t-val">CLOSED DAY 15</span><span class="t-dn">REROUTES = NEW LEADS ★</span></span><span class="t-sep">◆</span>
     <span class="t-item"><span class="t-lbl">COMMISSION TARGET</span><span class="t-val">$2/MT × ELIGIBLE VOLUME</span><span class="t-up">★ ACO ENERGIES</span></span><span class="t-sep">◆</span>
@@ -534,6 +534,16 @@ display:flex;align-items:flex-start;gap:12px;
     </div>
   </div>
 
+  <script>
+    // Restore AIS status from previous successful test
+    const savedAisStatus = localStorage.getItem('ais_status');
+     
+  if (savedAisStatus === 'live') {
+    setApiStatus('live', 'LIVE AIS');
+  } else {
+    setApiStatus('demo', 'DEMO');
+  }
+</script>
   <!-- TABS -->
 
   <div class="tab-bar">
@@ -652,7 +662,7 @@ display:flex;align-items:flex-start;gap:12px;
       <span style="font-size:18px;flex-shrink:0">📡</span>
       <div>
         <strong>HOW IT WORKS:</strong> Your dashboard calls a <strong>Netlify serverless function</strong> (<code style="color:var(--cyan)">/.netlify/functions/vessel-proxy</code>) 
-        which securely forwards requests to MarineTraffic's API. This avoids browser CORS restrictions and keeps your API key private (stored only in Netlify, never in browser code).
+        which securely forwards requests to AISSTREAM's API. This avoids browser CORS restrictions and keeps your API key private (stored only in Netlify, never in browser code).
         The Minerva Smart Filter and gap-finder scoring are applied automatically to all live results.
       </div>
     </div>
