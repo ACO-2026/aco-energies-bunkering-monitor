@@ -477,8 +477,8 @@ display:flex;align-items:flex-start;gap:12px;
     <span style="font-size:18px;flex-shrink:0">📡</span>
     <div>
       <strong>LIVE AIS INTEGRATION READY.</strong>
-      This dashboard connects to the <strong>MarineTraffic API</strong> to pull real vessel ETAs at Port Said &amp; Suez. 
-      In <strong>Demo Mode</strong> (current), representative vessels are shown. To activate live data: click <strong>⚙ Settings → enter your MarineTraffic API key</strong>. 
+      This dashboard connects to the <strong>ASSTREAM API</strong> to pull real vessel ETAs at Port Said &amp; Suez. 
+      In <strong>Demo Mode</strong> (current), representative vessels are shown. To activate live data: click <strong>⚙ Settings → enter your AISSTREAM_API_key</strong>. 
       The Minerva Smart Filter and gap-finder scoring run automatically on all live data.
     </div>
   </div>
@@ -647,7 +647,7 @@ display:flex;align-items:flex-start;gap:12px;
   <!-- ══ TAB: AIS SETUP ══ -->
 
   <div id="tp-ais" class="tp">
-    <div class="s-head"><div class="s-title">📡 Live AIS Integration — MarineTraffic Setup</div></div>
+    <div class="s-head"><div class="s-title">📡 Live AIS Integration — AISSTREAM Setup</div></div>
     <div class="alert-bar" style="margin-bottom:18px">
       <span style="font-size:18px;flex-shrink:0">📡</span>
       <div>
@@ -658,11 +658,11 @@ display:flex;align-items:flex-start;gap:12px;
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
       <div class="excl-cat" style="border-color:rgba(0,212,255,.2);background:rgba(0,212,255,.03)">
-        <div class="excl-cat-title" style="color:var(--cyan)">📋 STEP 1 — Get MarineTraffic API Key</div>
+        <div class="excl-cat-title" style="color:var(--cyan)">📋 STEP 1 — Get AISSTREAM API Key</div>
         <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--dim);line-height:1.8">
           1. Go to <strong style="color:var(--cyan)">marinetraffic.com/en/ais-api-services</strong><br>
           2. Register for an API account<br>
-          3. Subscribe to the <strong style="color:var(--cyan)">Expected Arrivals API</strong> (API ID: 4)<br>
+          3. Subscribe to the <strong style="color:var(--cyan)">AIS vessel stream / filtered vessel lookup</strong> (API ID: 4)<br>
           4. Copy your API key<br><br>
           <strong style="color:var(--text)">Recommended plan:</strong> Basic or Standard<br>
           <strong style="color:var(--text)">Key endpoint:</strong> Expected Arrivals at Port Said (ID: 1590) and Suez (ID: 3318)
@@ -675,7 +675,7 @@ display:flex;align-items:flex-start;gap:12px;
           2. Click your site → <strong>Site Configuration</strong><br>
           3. Click <strong>Environment Variables</strong><br>
           4. Click <strong>Add a variable</strong><br>
-          5. Key: <code style="color:var(--gold)">MARINETRAFFIC_API_KEY</code><br>
+          5. Key: <code style="color:var(--gold)">AISSTREAM_API_KEY</code><br>
           6. Value: <em>your API key here</em><br>
           7. Click <strong>Save</strong> → Redeploy site<br><br>
           <span style="color:var(--amber)">⚠ Never put your API key in the HTML/JS code.</span>
@@ -729,7 +729,7 @@ display:flex;align-items:flex-start;gap:12px;
     <div class="field-group">
       <label class="field-lbl">MARINETRAFFIC API KEY (stored locally only)</label>
       <input class="field-inp" id="s-apiKey" type="password" placeholder="Enter your MarineTraffic API key...">
-      <div class="field-hint">Get your key from marinetraffic.com/en/ais-api-services — Expected Arrivals API (ID: 4). Your key is stored in your browser's localStorage, not in any code.</div>
+      <div class="field-hint">Get your key from marinetraffic.com/en/ais-api-services — AISSTREAM vessel feed (ID: 4). Your key is stored in your browser's localStorage, not in any code.</div>
     </div>
     <div class="field-group">
       <label class="field-lbl">AUTO-REFRESH INTERVAL</label>
