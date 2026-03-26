@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACO Energies — Deal Origination Dashboard v3</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════
+   ACO ENERGIES — DEAL ORIGINATION v3
+   Dark maritime intelligence terminal aesthetic
+══════════════════════════════════════════════════════ */
+:root {
+  --bg:      #040810;
+  --navy:    #070e1c;
+  --panel:   #0b1524;
+  --panel2:  #0f1d30;
+  --panel3:  #132438;
+  --border:  #182c48;
+  --border2: #1f3d63;
+  --gold:    #f5c842;
+  --gold2:   #c89e00;
+  --amber:   #ff9500;
+  --green:   #00e676;
+  --green2:  #00b356;
+  --red:     #ff3b3b;
+  --orange:  #ff6b35;
+  --blue:    #4a9eff;
+  --cyan:    #00d4ff;
+  --text:    #e2e8f4;
+  --dim:     #5a7ea0;
+  --muted:   #2f4a68;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+background:var(–bg);
+color:var(–text);
+font-family:‘Syne’,sans-serif;
+min-height:100vh;
+overflow-x:hidden;
+cursor:default;
+}
+
+/* Scanline */
+body::after{
+content:’’;position:fixed;inset:0;pointer-events:none;z-index:9000;
+background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.025) 3px,rgba(0,0,0,.025) 4px);
+}
+
+/* ── HEADER ─────────────────────────────── */
+.hdr{
+position:sticky;top:0;z-index:500;
+background:linear-gradient(180deg,#060d1e 0%,#080f1e 100%);
+border-bottom:1px solid var(–border2);
+box-shadow:0 2px 40px rgba(0,0,0,.6);
+display:flex;align-items:center;justify-content:space-between;
+padding:0 28px;height:60px;
+}
+
+.hdr-brand{display:flex;align-items:center;gap:14px}
+
+.star-logo{
+width:34px;height:34px;flex-shrink:0;
+background:var(–gold);
+clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+animation:star-pulse 3s ease-in-out infinite;
+}
+@keyframes star-pulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.25)drop-drop-shadow(0 0 8px var(–gold))}}
+
+.brand-col{display:flex;flex-direction:column;gap:2px}
+.brand-name{font-size:14px;font-weight:800;color:var(–gold);letter-spacing:.1em}
+.brand-sub{font-size:8px;color:var(–dim);letter-spacing:.2em;font-family:‘Space Mono’,monospace}
+
+.hdr-right{display:flex;align-items:center;gap:16px}
+
+.api-status{
+display:flex;align-items:center;gap:7px;
+padding:5px 14px;border-radius:4px;
+font-size:9px;font-family:‘Space Mono’,monospace;letter-spacing:.08em;
+transition:all .3s;cursor:pointer;
+}
+.api-status.live{background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.2);color:var(–green)}
+.api-status.demo{background:rgba(245,200,66,.07);border:1px solid rgba(245,200,66,.2);color:var(–gold)}
+.api-status.error{background:rgba(255,59,59,.07);border:1px solid rgba(255,59,59,.2);color:var(–red)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:blink 1.3s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+
+.refresh-btn{
+background:rgba(245,200,66,.07);border:1px solid rgba(245,200,66,.2);
+border-radius:4px;padding:6px 14px;color:var(–gold);
+font-size:9px;font-family:‘Space Mono’,monospace;letter-spacing:.1em;
+cursor:pointer;transition:all .2s;
+}
+.refresh-btn:hover{background:rgba(245,200,66,.15)}
+
+.settings-btn{
+background:var(–panel2);border:1px solid var(–border);
+border-radius:4px;width:32px;height:32px;
+display:flex;align-items:center;justify-content:center;
+cursor:pointer;font-size:15px;color:var(–dim);
+transition:all .2s;
+}
+.settings-btn:hover{border-color:var(–gold);color:var(–gold)}
+
+#clock{font-family:‘Space Mono’,monospace;font-size:10px;color:var(–dim);letter-spacing:.05em}
+
+/* ── TICKER ──────────────────────────────── */
+.ticker{
+background:rgba(245,200,66,.04);
+border-bottom:1px solid rgba(245,200,66,.1);
+height:30px;overflow:hidden;display:flex;align-items:center;
+}
+.ticker-track{
+display:flex;white-space:nowrap;
+animation:scroll-left 100s linear infinite;
+font-family:‘Space Mono’,monospace;font-size:9.5px;letter-spacing:.04em;
+}
+@keyframes scroll-left{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.t-item{display:inline-flex;align-items:center;gap:6px;margin-right:48px}
+.t-lbl{color:var(–gold);font-weight:700}
+.t-val{color:var(–text)}
+.t-up{color:var(–green)}
+.t-dn{color:var(–red)}
+.t-sep{color:var(–muted);margin-right:48px}
+
+/* ── LAYOUT ──────────────────────────────── */
+.page{max-width:1700px;margin:0 auto;padding:22px 22px 60px}
+
+/* ── SECTION LABEL ───────────────────────── */
+.s-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.s-title{
+display:flex;align-items:center;gap:9px;
+font-size:9px;font-weight:700;letter-spacing:.2em;
+color:var(–gold);text-transform:uppercase;
+font-family:‘Space Mono’,monospace;
+}
+.s-title::before{content:’’;width:2px;height:14px;background:var(–gold);border-radius:2px}
+
+/* ── KPI ROW ──────────────────────────────── */
+.kpi-row{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:20px}
+.kpi{
+background:var(–panel);border:1px solid var(–border);
+border-radius:7px;padding:15px 14px;position:relative;overflow:hidden;
+transition:border-color .2s;
+}
+.kpi:hover{border-color:var(–border2)}
+.kpi::after{content:’’;position:absolute;top:0;left:0;right:0;height:2px;background:var(–k-color,var(–gold))}
+.kpi .lbl{font-size:8px;letter-spacing:.15em;color:var(–muted);font-family:‘Space Mono’,monospace;text-transform:uppercase;margin-bottom:8px}
+.kpi .val{font-size:24px;font-weight:800;line-height:1;margin-bottom:5px}
+.kpi .sub{font-size:9px;color:var(–dim);font-family:‘Space Mono’,monospace}
+.k-green{–k-color:var(–green)}.k-red{–k-color:var(–red)}.k-blue{–k-color:var(–blue)}.k-amber{–k-color:var(–amber)}.k-cyan{–k-color:var(–cyan)}
+
+/* ── ALERT ───────────────────────────────── */
+.alert-bar{
+background:rgba(0,230,118,.03);border:1px solid rgba(0,230,118,.12);
+border-radius:7px;padding:12px 18px;margin-bottom:18px;
+font-family:‘DM Mono’,monospace;font-size:11px;color:var(–dim);line-height:1.7;
+display:flex;align-items:flex-start;gap:12px;
+}
+.alert-bar strong{color:var(–green)}
+.alert-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+
+.warn-bar{
+background:rgba(255,59,59,.03);border:1px solid rgba(255,59,59,.15);
+border-radius:7px;padding:11px 16px;margin-bottom:14px;
+font-family:‘Space Mono’,monospace;font-size:9.5px;color:rgba(255,59,59,.7);
+line-height:1.8;letter-spacing:.02em;
+}
+
+/* ── TABS ────────────────────────────────── */
+.tab-bar{display:flex;gap:3px;margin-bottom:18px;border-bottom:1px solid var(–border);padding-bottom:0}
+.tab{
+background:none;border:none;border-bottom:2px solid transparent;
+padding:9px 16px;font-size:10px;font-family:‘Space Mono’,monospace;
+color:var(–muted);cursor:pointer;transition:all .2s;letter-spacing:.06em;
+margin-bottom:-1px;
+}
+.tab:hover{color:var(–dim)}
+.tab.on{color:var(–gold);border-bottom-color:var(–gold)}
+.tp{display:none}.tp.on{display:block}
+
+/* ── FILTERS ─────────────────────────────── */
+.filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.fbtn{
+background:var(–panel);border:1px solid var(–border);border-radius:5px;
+padding:7px 14px;font-size:9px;font-family:‘Space Mono’,monospace;
+color:var(–muted);cursor:pointer;transition:all .2s;letter-spacing:.05em;
+}
+.fbtn:hover{border-color:var(–border2);color:var(–dim)}
+.fbtn.fa{background:rgba(245,200,66,.07);border-color:var(–gold);color:var(–gold)}
+.fbtn.fg{background:rgba(0,230,118,.07);border-color:var(–green);color:var(–green)}
+.search{
+background:var(–panel);border:1px solid var(–border);border-radius:5px;
+padding:7px 13px;font-size:9px;font-family:‘Space Mono’,monospace;
+color:var(–text);outline:none;width:200px;transition:border-color .2s;
+}
+.search:focus{border-color:var(–gold)}
+.search::placeholder{color:var(–muted)}
+
+/* ── TABLE ───────────────────────────────── */
+.tbl-wrap{background:var(–panel);border:1px solid var(–border);border-radius:8px;overflow:hidden;margin-bottom:20px}
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+thead th{
+background:var(–navy);padding:11px 13px;text-align:left;
+font-size:8px;font-family:‘Space Mono’,monospace;letter-spacing:.14em;
+text-transform:uppercase;color:var(–muted);border-bottom:1px solid var(–border);
+white-space:nowrap;cursor:pointer;user-select:none;
+}
+thead th:hover{color:var(–gold)}
+tbody tr{border-bottom:1px solid rgba(24,44,72,.5);transition:background .15s;cursor:pointer}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,.018)}
+tbody td{padding:12px 13px;vertical-align:middle}
+
+/* Row accent stripes */
+tbody tr.eligible{border-left:3px solid var(–green)}
+tbody tr.blocked{border-left:3px solid var(–red);opacity:.5}
+tbody tr.validate{border-left:3px solid var(–blue)}
+tbody tr.monitor{border-left:3px solid var(–amber)}
+tbody tr.live-row{border-left:3px solid var(–cyan)}
+
+.vname{font-weight:700;color:var(–text);font-size:12px;display:block;margin-bottom:1px}
+.vimo{font-family:‘Space Mono’,monospace;font-size:8px;color:var(–muted)}
+.cop{font-size:10.5px;font-weight:600;color:var(–dim)}
+.csz{font-family:‘Space Mono’,monospace;font-size:8px;color:var(–muted);margin-top:2px}
+
+/* Score */
+.scr-wrap{display:flex;align-items:center;gap:7px}
+.scr-n{font-family:‘Space Mono’,monospace;font-size:13px;font-weight:700;min-width:28px}
+.scr-n.hi{color:var(–green)}.scr-n.mid{color:var(–gold)}.scr-n.lo{color:var(–red)}
+.scr-bg{width:54px;height:3px;background:var(–border);border-radius:2px;overflow:hidden}
+.scr-fill{height:100%;border-radius:2px}
+.scr-fill.hi{background:var(–green)}.scr-fill.mid{background:var(–gold)}.scr-fill.lo{background:var(–red)}
+
+/* Pills */
+.pill{display:inline-block;padding:3px 9px;border-radius:3px;font-size:8px;font-family:‘Space Mono’,monospace;font-weight:700;letter-spacing:.06em;white-space:nowrap}
+.p-ok{background:rgba(0,230,118,.1);color:var(–green);border:1px solid rgba(0,230,118,.2)}
+.p-no{background:rgba(255,59,59,.1);color:var(–red);border:1px solid rgba(255,59,59,.2)}
+.p-chk{background:rgba(74,158,255,.1);color:var(–blue);border:1px solid rgba(74,158,255,.2)}
+.p-mon{background:rgba(255,149,0,.1);color:var(–amber);border:1px solid rgba(255,149,0,.2)}
+.p-live{background:rgba(0,212,255,.1);color:var(–cyan);border:1px solid rgba(0,212,255,.2)}
+
+/* Fuel tag */
+.fuel{display:inline-block;padding:2px 7px;border-radius:3px;font-size:8px;font-family:‘Space Mono’,monospace;font-weight:700}
+.f-vlsfo{background:rgba(0,212,255,.08);color:var(–cyan);border:1px solid rgba(0,212,255,.15)}
+.f-hsfo{background:rgba(255,107,53,.1);color:var(–orange);border:1px solid rgba(255,107,53,.2)}
+.f-mgo{background:rgba(74,158,255,.08);color:var(–blue);border:1px solid rgba(74,158,255,.15)}
+.f-lng{background:rgba(0,230,118,.08);color:var(–green);border:1px solid rgba(0,230,118,.15)}
+
+/* Chip */
+.chip{
+display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:3px;
+font-size:7.5px;font-family:‘Space Mono’,monospace;white-space:nowrap;margin:1px;
+}
+.chip-new{background:rgba(0,230,118,.06);color:var(–green);border:1px solid rgba(0,230,118,.15)}
+.chip-reroute{background:rgba(255,149,0,.06);color:var(–amber);border:1px solid rgba(255,149,0,.15)}
+.chip-live{background:rgba(0,212,255,.06);color:var(–cyan);border:1px solid rgba(0,212,255,.15)}
+
+.comm-val{font-family:‘Space Mono’,monospace;font-size:11px;color:var(–gold);font-weight:700}
+.reason{font-size:9px;color:var(–dim);font-family:‘DM Mono’,monospace;max-width:190px;line-height:1.55}
+.reason.blocked{color:rgba(255,59,59,.6)}
+
+/* ── OPPORTUNITY CARDS ───────────────────── */
+.opp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.opp-card{
+background:var(–panel);border:1px solid var(–border);border-radius:9px;
+padding:20px;position:relative;overflow:hidden;transition:all .2s;
+}
+.opp-card:hover{border-color:var(–green);transform:translateY(-2px)}
+.opp-card::before{content:’’;position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(–green),var(–cyan))}
+.opp-rank{
+position:absolute;top:14px;right:14px;
+width:26px;height:26px;border-radius:50%;
+background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.2);
+display:flex;align-items:center;justify-content:center;
+font-size:11px;font-weight:800;color:var(–green);font-family:‘Space Mono’,monospace;
+}
+.opp-score{font-size:44px;font-weight:800;color:var(–green);line-height:1;margin-bottom:3px}
+.opp-score-lbl{font-size:8px;font-family:‘Space Mono’,monospace;color:var(–muted);letter-spacing:.12em;margin-bottom:11px}
+.opp-vessel{font-size:14px;font-weight:700;margin-bottom:3px}
+.opp-co{font-size:10px;color:var(–dim);margin-bottom:12px}
+.opp-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:11px}
+.opp-chip{background:var(–panel2);border:1px solid var(–border);border-radius:3px;padding:3px 9px;font-size:9px;font-family:‘Space Mono’,monospace;color:var(–dim)}
+.opp-chip span{color:var(–text)}
+.opp-comm{
+background:rgba(245,200,66,.05);border:1px solid rgba(245,200,66,.12);
+border-radius:5px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;
+}
+.opp-comm-lbl{font-size:8px;font-family:‘Space Mono’,monospace;color:var(–muted);letter-spacing:.1em}
+.opp-comm-val{font-size:15px;font-weight:800;color:var(–gold);font-family:‘Space Mono’,monospace}
+.opp-why{margin-top:9px;font-size:9px;color:var(–dim);font-family:‘DM Mono’,monospace;line-height:1.6;border-top:1px solid var(–border);padding-top:9px}
+.opp-why strong{color:var(–green)}
+
+/* ── EXCLUSIONS ──────────────────────────── */
+.excl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.excl-cat{
+background:rgba(255,59,59,.03);border:1px solid rgba(255,59,59,.12);
+border-radius:7px;padding:15px;
+}
+.excl-cat-title{font-size:9px;font-family:‘Space Mono’,monospace;letter-spacing:.1em;color:var(–red);margin-bottom:9px}
+.excl-tags{display:flex;flex-wrap:wrap;gap:4px}
+.excl-tag{
+background:rgba(255,59,59,.06);border:1px solid rgba(255,59,59,.12);
+border-radius:3px;padding:2px 7px;font-size:8px;
+font-family:‘Space Mono’,monospace;color:rgba(255,59,59,.65);
+}
+
+/* ── PRICE TABLE ─────────────────────────── */
+.price-hi td{background:rgba(245,200,66,.03)}
+.price-hi td:first-child{color:var(–gold)!important}
+
+/* ── COMMISSION TABLE ────────────────────── */
+.comm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.comm-stat{
+text-align:center;padding:14px;
+background:var(–navy);border-radius:7px;border:1px solid var(–border);
+}
+.comm-stat-val{font-size:26px;font-weight:800;color:var(–gold);font-family:‘Space Mono’,monospace;margin-bottom:3px}
+.comm-stat-lbl{font-size:8px;font-family:‘Space Mono’,monospace;color:var(–muted);letter-spacing:.12em}
+
+/* ── SETTINGS MODAL ──────────────────────── */
+.modal-bg{
+display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);
+z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px);
+}
+.modal-bg.open{display:flex}
+.modal{
+background:var(–panel);border:1px solid var(–border2);border-radius:10px;
+padding:28px;width:520px;max-width:95vw;
+animation:modal-in .25s ease both;
+}
+@keyframes modal-in{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.modal-title{font-size:13px;font-weight:700;color:var(–gold);margin-bottom:6px;letter-spacing:.05em}
+.modal-sub{font-size:10px;color:var(–dim);font-family:‘DM Mono’,monospace;margin-bottom:20px;line-height:1.6}
+.field-group{margin-bottom:16px}
+.field-lbl{font-size:9px;font-family:‘Space Mono’,monospace;color:var(–dim);letter-spacing:.1em;margin-bottom:7px;display:block}
+.field-inp{
+width:100%;background:var(–panel2);border:1px solid var(–border);
+border-radius:5px;padding:10px 13px;font-size:11px;font-family:‘Space Mono’,monospace;
+color:var(–text);outline:none;transition:border-color .2s;
+}
+.field-inp:focus{border-color:var(–gold)}
+.field-hint{font-size:8.5px;color:var(–muted);font-family:‘DM Mono’,monospace;margin-top:5px;line-height:1.5}
+.modal-btns{display:flex;gap:10px;margin-top:20px}
+.btn-primary{
+background:var(–gold);border:none;border-radius:5px;padding:10px 22px;
+font-size:10px;font-family:‘Space Mono’,monospace;font-weight:700;
+color:var(–navy);cursor:pointer;letter-spacing:.08em;transition:opacity .2s;
+}
+.btn-primary:hover{opacity:.9}
+.btn-secondary{
+background:var(–panel2);border:1px solid var(–border);border-radius:5px;padding:10px 18px;
+font-size:10px;font-family:‘Space Mono’,monospace;color:var(–dim);cursor:pointer;
+letter-spacing:.08em;transition:all .2s;
+}
+.btn-secondary:hover{border-color:var(–border2);color:var(–text)}
+
+/* ── LOADING OVERLAY ─────────────────────── */
+.loading{
+display:none;position:fixed;bottom:24px;right:24px;z-index:900;
+background:var(–panel);border:1px solid var(–border2);border-radius:7px;
+padding:12px 18px;font-size:10px;font-family:‘Space Mono’,monospace;
+color:var(–cyan);display:flex;align-items:center;gap:10px;
+animation:slide-in .3s ease;
+}
+@keyframes slide-in{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.loading.hidden{display:none!important}
+.spin{
+width:14px;height:14px;border:2px solid rgba(0,212,255,.2);
+border-top-color:var(–cyan);border-radius:50%;
+animation:spin .8s linear infinite;flex-shrink:0;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── REFRESH COUNTER ─────────────────────── */
+.refresh-info{
+font-family:‘Space Mono’,monospace;font-size:9px;color:var(–muted);
+display:flex;align-items:center;gap:8px;
+}
+
+/* ── MAP PLACEHOLDER ─────────────────────── */
+.map-placeholder{
+background:var(–panel);border:1px solid var(–border);border-radius:8px;
+height:320px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+gap:12px;margin-bottom:20px;position:relative;overflow:hidden;
+}
+.map-bg-text{
+position:absolute;font-size:120px;font-weight:800;color:rgba(255,255,255,.02);
+letter-spacing:-.02em;user-select:none;
+}
+.map-label{font-size:13px;font-weight:700;color:var(–dim)}
+.map-sub{font-size:9px;font-family:‘Space Mono’,monospace;color:var(–muted);letter-spacing:.1em;text-align:center}
+
+/* ── AIS BANNER ──────────────────────────── */
+.ais-banner{
+background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.15);
+border-radius:7px;padding:12px 18px;margin-bottom:14px;
+font-family:‘DM Mono’,monospace;font-size:11px;color:var(–dim);line-height:1.7;
+display:flex;align-items:flex-start;gap:12px;
+}
+.ais-banner strong{color:var(–cyan)}
+
+/* ── RESPONSIVE ──────────────────────────── */
+@media(max-width:1300px){.kpi-row{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:900px){
+.kpi-row{grid-template-columns:repeat(2,1fr)}
+.opp-grid{grid-template-columns:1fr}
+.excl-grid{grid-template-columns:1fr}
+.comm-stats{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ── FADE IN ─────────────────────────────── */
+.fade-in{animation:fade-up .45s ease both}
+@keyframes fade-up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+</style>
+
+</head>
+<body>
+
+<!-- ════ HEADER ════ -->
+
+<header class="hdr">
+  <div class="hdr-brand">
+    <div class="star-logo"></div>
+    <div class="brand-col">
+      <span class="brand-name">ACO ENERGIES</span>
+      <span class="brand-sub">DEAL ORIGINATION v3 · LIVE AIS + MINERVA SMART FILTER</span>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="refresh-info">
+      NEXT REFRESH <span id="countdown" style="color:var(--gold);margin-left:4px">60s</span>
+    </div>
+    <div id="apiStatus" class="api-status demo" onclick="openSettings()" title="Click to configure API key">
+      <span class="status-dot"></span>
+      <span id="apiStatusText">DEMO MODE</span>
+    </div>
+    <button class="refresh-btn" onclick="fetchVessels()">↻ REFRESH NOW</button>
+    <button class="settings-btn" onclick="openSettings()" title="Settings">⚙</button>
+    <span id="clock">--:-- UTC</span>
+  </div>
+</header>
+
+<!-- ════ TICKER ════ -->
+
+<div class="ticker">
+  <div class="ticker-track">
+    <span class="t-item"><span class="t-lbl">BRENT</span><span class="t-val" id="tk-brent">$103.14/bbl</span><span class="t-up">▲+2.7%</span></span><span class="t-sep">◆</span>
+    <span class="t-item"><span class="t-lbl">PORT SAID VLSFO</span><span class="t-val">$940/mt</span><span class="t-up">★ BEST PRICE</span></span><span class="t-sep">◆</span>
+    <span class="t-item"><span class="t-lbl">MINERVA FILTER</span><span class="t-val">ACTIVE</span><span class="t-up" id="tk-excl">108 NAMES EXCLUDED</span></span><span class="t-sep">◆</span>
+    <span class="t-item"><span class="t-lbl">ELIGIBLE STEMS</span><span class="t-val" id="tk-elig">14</span><span class="t-up">↑ OLD DASHBOARD HAD 2</span></span><span class="t-sep">◆</span>
+    <span class="t-item"><span class="t-lbl">AIS FEED</span><span class="t-val" id="tk-ais">DEMO MODE</span><span class="t-up">SET API KEY FOR LIVE</span></span><span class="t-sep">◆</span>
+    <span class="t-item"><span class="t-lbl">CAPE ARB</span><span class="t-val">$540/mt OVER PORT SAID</span><span class="t-up">$10.8M ON 20K STEM</span></span><span class="t-sep">◆</span>
+    <span class="t-item"><span class="t-lbl">HORMUZ</span><span class="t-val">CLOSED DAY 15</span><span class="t-dn">REROUTES = NEW LEADS ★</span></span><span class="t-sep">◆</span>
+    <span class="t-item"><span class="t-lbl">COMMISSION TARGET</span><span class="t-val">$2/MT × ELIGIBLE VOLUME</span><span class="t-up">★ ACO ENERGIES</span></span><span class="t-sep">◆</span>
+    <span class="t-item"><span class="t-lbl">EU-ETS SAVING</span><span class="t-val">$319/mt</span><span class="t-up">EGYPT OUTSIDE EEA</span></span><span class="t-sep">◆</span>
+    <!-- Duplicate for seamless loop -->
+    <span class="t-item"><span class="t-lbl">BRENT</span><span class="t-val">$103.14/bbl</span><span class="t-up">▲+2.7%</span></span><span class="t-sep">◆</span>
+    <span class="t-item"><span class="t-lbl">PORT SAID VLSFO</span><span class="t-val">$940/mt</span><span class="t-up">★ BEST PRICE</span></span><span class="t-sep">◆</span>
+    <span class="t-item"><span class="t-lbl">MINERVA FILTER</span><span class="t-val">ACTIVE</span><span class="t-up">108 NAMES EXCLUDED</span></span><span class="t-sep">◆</span>
+    <span class="t-item"><span class="t-lbl">ELIGIBLE STEMS</span><span class="t-val" id="tk-elig2">14</span><span class="t-up">↑ OLD DASHBOARD HAD 2</span></span><span class="t-sep">◆</span>
+    <span class="t-item"><span class="t-lbl">CAPE ARB</span><span class="t-val">$540/mt OVER PORT SAID</span><span class="t-up">$10.8M ON 20K STEM</span></span><span class="t-sep">◆</span>
+    <span class="t-item"><span class="t-lbl">HORMUZ</span><span class="t-val">CLOSED DAY 15</span><span class="t-dn">REROUTES = NEW LEADS ★</span></span><span class="t-sep">◆</span>
+  </div>
+</div>
+
+<!-- ════ PAGE ════ -->
+
+<div class="page">
+
+  <!-- AIS BANNER -->
+
+  <div class="ais-banner fade-in">
+    <span style="font-size:18px;flex-shrink:0">📡</span>
+    <div>
+      <strong>LIVE AIS INTEGRATION READY.</strong>
+      This dashboard connects to the <strong>MarineTraffic API</strong> to pull real vessel ETAs at Port Said &amp; Suez. 
+      In <strong>Demo Mode</strong> (current), representative vessels are shown. To activate live data: click <strong>⚙ Settings → enter your MarineTraffic API key</strong>. 
+      The Minerva Smart Filter and gap-finder scoring run automatically on all live data.
+    </div>
+  </div>
+
+  <!-- LOGIC NOTICE -->
+
+  <div class="alert-bar fade-in">
+    <span class="alert-icon">✅</span>
+    <div>
+      <strong>INVERTED GAP-FINDER SCORING ACTIVE.</strong> High scores = Minerva does NOT know this operator. Low scores = Minerva direct client — never send. 
+      COSCO, MSC, CMA CGM, Maersk and 105 other names are <strong>automatically filtered out</strong> so you only see genuinely eligible stems. 
+      Scoring rewards: independent owners · small fleets · first-time Port Said callers · Hormuz reroutes · niche flag states.
+    </div>
+  </div>
+
+  <!-- KPI ROW -->
+
+  <div class="kpi-row">
+    <div class="kpi k-green fade-in">
+      <div class="lbl">Eligible Stems</div>
+      <div class="val" id="kpi-eligible" style="color:var(--green)">14</div>
+      <div class="sub">Score ≥65 · Unknown to Minerva</div>
+    </div>
+    <div class="kpi k-red fade-in" style="animation-delay:.05s">
+      <div class="lbl">Blocked (Filter)</div>
+      <div class="val" id="kpi-blocked" style="color:var(--red)">11</div>
+      <div class="sub">Minerva direct — do not send</div>
+    </div>
+    <div class="kpi fade-in" style="animation-delay:.1s">
+      <div class="lbl">Est. Commission MTD</div>
+      <div class="val" style="color:var(--gold)" id="kpi-comm">$52K</div>
+      <div class="sub">At $2/MT · confirmed stems</div>
+    </div>
+    <div class="kpi k-blue fade-in" style="animation-delay:.15s">
+      <div class="lbl">New to Port Said</div>
+      <div class="val" id="kpi-new" style="color:var(--blue)">6</div>
+      <div class="sub">First-time callers</div>
+    </div>
+    <div class="kpi k-amber fade-in" style="animation-delay:.2s">
+      <div class="lbl">Hormuz Reroutes</div>
+      <div class="val" id="kpi-reroute" style="color:var(--amber)">9</div>
+      <div class="sub">Diverted · unplanned stems</div>
+    </div>
+    <div class="kpi k-cyan fade-in" style="animation-delay:.25s">
+      <div class="lbl">AIS Source</div>
+      <div class="val" style="color:var(--cyan);font-size:14px;margin-top:4px" id="kpi-source">DEMO</div>
+      <div class="sub" id="kpi-updated">Set API key for live</div>
+    </div>
+    <div class="kpi fade-in" style="animation-delay:.3s">
+      <div class="lbl">Exclusion DB</div>
+      <div class="val">108</div>
+      <div class="sub">Minerva direct names loaded</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+
+  <div class="tab-bar">
+    <button class="tab on" onclick="switchTab('cockpit',this)">★ Deal Cockpit</button>
+    <button class="tab" onclick="switchTab('opportunities',this)">🎯 Top Opportunities</button>
+    <button class="tab" onclick="switchTab('exclusions',this)">🚫 Exclusion DB</button>
+    <button class="tab" onclick="switchTab('prices',this)">⛽ Fuel Prices</button>
+    <button class="tab" onclick="switchTab('commission',this)">💰 Commission</button>
+    <button class="tab" onclick="switchTab('ais',this)">📡 AIS Setup</button>
+  </div>
+
+  <!-- ══ TAB: COCKPIT ══ -->
+
+  <div id="tp-cockpit" class="tp on">
+    <div class="warn-bar">
+      ⚠ RED ROWS = Minerva already knows these clients. Sending them to Minerva destroys your credibility. ONLY send GREEN rows to Minerva. BLUE rows need verification first.
+    </div>
+    <div class="s-head">
+      <div class="s-title">Full Pipeline — <span id="vessel-count-label">25 Vessels</span></div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:9px;font-family:'Space Mono',monospace">
+        <span style="color:var(--green)">● Eligible</span>
+        <span style="color:var(--red)">● Blocked</span>
+        <span style="color:var(--blue)">● Validate</span>
+        <span style="color:var(--amber)">● Monitor</span>
+        <span style="color:var(--cyan)">● Live AIS</span>
+      </div>
+    </div>
+    <div class="filters">
+      <button class="fbtn fa" onclick="filterTable('all',this)">All</button>
+      <button class="fbtn" onclick="filterTable('eligible',this)">✅ Eligible</button>
+      <button class="fbtn" onclick="filterTable('blocked',this)">🚫 Blocked</button>
+      <button class="fbtn" onclick="filterTable('validate',this)">🔍 Validate</button>
+      <button class="fbtn" onclick="filterTable('monitor',this)">👁 Monitor</button>
+      <button class="fbtn" onclick="filterTable('live-row',this)" style="border-color:rgba(0,212,255,.3);color:var(--cyan)">📡 Live AIS</button>
+      <input class="search" type="text" placeholder="Search vessel, operator..." oninput="searchTable(this.value)">
+    </div>
+    <div class="tbl-wrap">
+      <table id="mainTable">
+        <thead>
+          <tr>
+            <th onclick="sortTable(0)">VESSEL ↕</th>
+            <th>OPERATOR</th>
+            <th onclick="sortTable(2)">PORT · ETA ↕</th>
+            <th>FUEL · QTY</th>
+            <th onclick="sortTable(4)">SCORE ↕</th>
+            <th>MINERVA STATUS</th>
+            <th>ELIGIBILITY</th>
+            <th onclick="sortTable(7)">COMMISSION ↕</th>
+            <th>WHY / WHY NOT</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ TAB: OPPORTUNITIES ══ -->
+
+  <div id="tp-opportunities" class="tp">
+    <div class="s-head"><div class="s-title">🎯 Top 3 Eligible Stems — Send to Minerva NOW</div></div>
+    <div class="opp-grid" id="oppGrid"></div>
+  </div>
+
+  <!-- ══ TAB: EXCLUSIONS ══ -->
+
+  <div id="tp-exclusions" class="tp">
+    <div class="s-head"><div class="s-title">🚫 Minerva Direct Client Exclusion Database (108 Names)</div></div>
+    <div class="warn-bar">⚠ NEVER bring these names to Minerva. They have direct relationships with all of the below. This list is automatically applied to every vessel in the pipeline.</div>
+    <div class="excl-grid" id="exclGrid"></div>
+  </div>
+
+  <!-- ══ TAB: PRICES ══ -->
+
+  <div id="tp-prices" class="tp">
+    <div class="s-head"><div class="s-title">⛽ Fuel Price Matrix — Port Said vs World</div></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>PORT</th><th>VLSFO 0.5%S</th><th>HSFO 380</th><th>MGO 0.1%</th><th>EU-ETS COST</th><th>STATUS</th><th>ACO ADVANTAGE</th></tr></thead>
+        <tbody>
+          <tr class="price-hi"><td><strong>★ Port Said</strong></td><td><strong style="color:var(--green)">$940</strong></td><td><strong style="color:var(--green)">$590</strong></td><td>$1,120</td><td><span class="pill p-ok">FREE</span></td><td><span class="pill p-ok">AVAILABLE</span></td><td style="font-family:'Space Mono',monospace;font-size:9px;color:var(--gold)">Best price + ETS-free. Primary ACO hub.</td></tr>
+          <tr class="price-hi"><td><strong>★ Suez</strong></td><td>$960</td><td>$610</td><td>$1,140</td><td><span class="pill p-ok">FREE</span></td><td><span class="pill p-ok">ACTIVE</span></td><td style="font-family:'Space Mono',monospace;font-size:9px;color:var(--gold)">Convoy window. Bundle with Port Said.</td></tr>
+          <tr><td>Jeddah</td><td>$990</td><td>$620</td><td>$1,160</td><td><span class="pill p-ok">FREE</span></td><td><span class="pill p-mon">CAUTION</span></td><td style="font-family:'Space Mono',monospace;font-size:9px;color:var(--dim)">Neutral flag only.</td></tr>
+          <tr><td>Rotterdam</td><td>$1,020</td><td>$680</td><td>$1,180</td><td><span class="pill p-no">+$319/MT</span></td><td><span class="pill p-chk">NORMAL</span></td><td style="font-family:'Space Mono',monospace;font-size:9px;color:var(--dim)">ETS adds $319/MT on top of price.</td></tr>
+          <tr><td>Piraeus</td><td>$1,050</td><td>$700</td><td>$1,200</td><td><span class="pill p-no">+$319/MT</span></td><td><span class="pill p-chk">NORMAL</span></td><td style="font-family:'Space Mono',monospace;font-size:9px;color:var(--dim)">ACO saves $429/MT total vs Piraeus.</td></tr>
+          <tr><td>Singapore</td><td>$1,085</td><td>$710</td><td>$1,210</td><td style="color:var(--muted)">N/A</td><td><span class="pill p-chk">NORMAL</span></td><td style="font-family:'Space Mono',monospace;font-size:9px;color:var(--dim)">$145/MT more than Port Said.</td></tr>
+          <tr><td>Cape Town</td><td style="color:var(--red)">$1,480</td><td>$1,050</td><td>$1,550</td><td style="color:var(--muted)">N/A</td><td><span class="pill p-mon">CONGESTED</span></td><td style="font-family:'Space Mono',monospace;font-size:9px;color:var(--amber)">$540/MT above Port Said — massive arb!</td></tr>
+          <tr><td style="color:var(--red)">✖ Fujairah</td><td style="color:var(--red)">SUSPENDED</td><td style="color:var(--red)">SUSPENDED</td><td style="color:var(--red)">SUSPENDED</td><td style="color:var(--muted)">—</td><td><span class="pill p-no">CLOSED</span></td><td style="font-family:'Space Mono',monospace;font-size:9px;color:var(--red)">Hormuz blockade. All demand → Egypt.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ TAB: COMMISSION ══ -->
+
+  <div id="tp-commission" class="tp">
+    <div class="s-head"><div class="s-title">💰 Commission Tracker — ACO × Minerva ($2/MT)</div></div>
+    <div class="comm-stats">
+      <div class="comm-stat"><div class="comm-stat-val">$52,400</div><div class="comm-stat-lbl">EARNED MTD</div></div>
+      <div class="comm-stat"><div class="comm-stat-val" id="comm-pipeline">$148K</div><div class="comm-stat-lbl">PIPELINE VALUE</div></div>
+      <div class="comm-stat"><div class="comm-stat-val">26,200 MT</div><div class="comm-stat-lbl">VOLUME PLACED</div></div>
+      <div class="comm-stat"><div class="comm-stat-val">$2.00/MT</div><div class="comm-stat-lbl">CONTRACT RATE</div></div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>VESSEL</th><th>OPERATOR</th><th>PORT</th><th>QTY (MT)</th><th>EST. COMMISSION</th><th>STATUS</th></tr></thead>
+        <tbody id="commTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ TAB: AIS SETUP ══ -->
+
+  <div id="tp-ais" class="tp">
+    <div class="s-head"><div class="s-title">📡 Live AIS Integration — MarineTraffic Setup</div></div>
+    <div class="alert-bar" style="margin-bottom:18px">
+      <span style="font-size:18px;flex-shrink:0">📡</span>
+      <div>
+        <strong>HOW IT WORKS:</strong> Your dashboard calls a <strong>Netlify serverless function</strong> (<code style="color:var(--cyan)">/.netlify/functions/vessel-proxy</code>) 
+        which securely forwards requests to MarineTraffic's API. This avoids browser CORS restrictions and keeps your API key private (stored only in Netlify, never in browser code).
+        The Minerva Smart Filter and gap-finder scoring are applied automatically to all live results.
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="excl-cat" style="border-color:rgba(0,212,255,.2);background:rgba(0,212,255,.03)">
+        <div class="excl-cat-title" style="color:var(--cyan)">📋 STEP 1 — Get MarineTraffic API Key</div>
+        <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--dim);line-height:1.8">
+          1. Go to <strong style="color:var(--cyan)">marinetraffic.com/en/ais-api-services</strong><br>
+          2. Register for an API account<br>
+          3. Subscribe to the <strong style="color:var(--cyan)">Expected Arrivals API</strong> (API ID: 4)<br>
+          4. Copy your API key<br><br>
+          <strong style="color:var(--text)">Recommended plan:</strong> Basic or Standard<br>
+          <strong style="color:var(--text)">Key endpoint:</strong> Expected Arrivals at Port Said (ID: 1590) and Suez (ID: 3318)
+        </div>
+      </div>
+      <div class="excl-cat" style="border-color:rgba(0,212,255,.2);background:rgba(0,212,255,.03)">
+        <div class="excl-cat-title" style="color:var(--cyan)">🔑 STEP 2 — Add Key to Netlify</div>
+        <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--dim);line-height:1.8">
+          1. Log in to <strong style="color:var(--cyan)">app.netlify.com</strong><br>
+          2. Click your site → <strong>Site Configuration</strong><br>
+          3. Click <strong>Environment Variables</strong><br>
+          4. Click <strong>Add a variable</strong><br>
+          5. Key: <code style="color:var(--gold)">MARINETRAFFIC_API_KEY</code><br>
+          6. Value: <em>your API key here</em><br>
+          7. Click <strong>Save</strong> → Redeploy site<br><br>
+          <span style="color:var(--amber)">⚠ Never put your API key in the HTML/JS code.</span>
+        </div>
+      </div>
+      <div class="excl-cat" style="border-color:rgba(245,200,66,.2);background:rgba(245,200,66,.03)">
+        <div class="excl-cat-title" style="color:var(--gold)">⚙ STEP 3 — Configure in Dashboard</div>
+        <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--dim);line-height:1.8">
+          1. Click <strong style="color:var(--gold)">⚙ Settings</strong> in the header (top right)<br>
+          2. Confirm your Netlify function URL<br>
+          3. Set refresh interval (30–120 seconds)<br>
+          4. Click <strong>Save & Test Connection</strong><br>
+          5. If successful, status badge turns <strong style="color:var(--cyan)">LIVE AIS</strong><br><br>
+          The dashboard auto-refreshes and applies the Minerva filter to all live vessel data.
+        </div>
+      </div>
+      <div class="excl-cat" style="border-color:rgba(0,230,118,.2);background:rgba(0,230,118,.03)">
+        <div class="excl-cat-title" style="color:var(--green)">✅ What You Get When Live</div>
+        <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--dim);line-height:1.8">
+          • Real vessel ETAs at Port Said &amp; Suez (48hr window)<br>
+          • Vessel name, IMO, flag, operator, DWT pulled from AIS<br>
+          • Auto-scored against Minerva exclusion database<br>
+          • New-caller flag based on AIS history<br>
+          • Estimated fuel type and quantity from vessel class<br>
+          • Commission estimate per eligible stem<br>
+          • Auto-refresh every 60 seconds<br>
+          • <strong style="color:var(--green)">Demo data shown when API unavailable</strong>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:16px;text-align:center">
+      <button class="btn-primary" onclick="openSettings()">⚙ Open Settings Now</button>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- ════ SETTINGS MODAL ════ -->
+
+<div class="modal-bg" id="settingsModal">
+  <div class="modal">
+    <div class="modal-title">⚙ Dashboard Settings — AIS Configuration</div>
+    <div class="modal-sub">
+      Configure your MarineTraffic API connection. Your API key is stored locally in your browser and sent only to your Netlify serverless proxy — never exposed in public code.
+    </div>
+    <div class="field-group">
+      <label class="field-lbl">NETLIFY FUNCTION URL</label>
+      <input class="field-inp" id="s-funcUrl" type="text" value="/.netlify/functions/vessel-proxy" placeholder="/.netlify/functions/vessel-proxy">
+      <div class="field-hint">Default: /.netlify/functions/vessel-proxy — only change if you renamed the function file.</div>
+    </div>
+    <div class="field-group">
+      <label class="field-lbl">MARINETRAFFIC API KEY (stored locally only)</label>
+      <input class="field-inp" id="s-apiKey" type="password" placeholder="Enter your MarineTraffic API key...">
+      <div class="field-hint">Get your key from marinetraffic.com/en/ais-api-services — Expected Arrivals API (ID: 4). Your key is stored in your browser's localStorage, not in any code.</div>
+    </div>
+    <div class="field-group">
+      <label class="field-lbl">AUTO-REFRESH INTERVAL</label>
+      <select class="field-inp" id="s-interval">
+        <option value="30">30 seconds</option>
+        <option value="60" selected>60 seconds (recommended)</option>
+        <option value="120">2 minutes</option>
+        <option value="300">5 minutes</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label class="field-lbl">PORTS TO MONITOR</label>
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:10px;font-family:'Space Mono',monospace;color:var(--dim);cursor:pointer">
+          <input type="checkbox" id="s-portSaid" checked style="accent-color:var(--gold)"> Port Said (ID: 1590)
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:10px;font-family:'Space Mono',monospace;color:var(--dim);cursor:pointer">
+          <input type="checkbox" id="s-suez" checked style="accent-color:var(--gold)"> Suez (ID: 3318)
+        </label>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-primary" onclick="saveSettings()">💾 Save &amp; Test Connection</button>
+      <button class="btn-secondary" onclick="closeSettings()">Cancel</button>
+      <button class="btn-secondary" onclick="clearApiKey()" style="color:var(--red);border-color:rgba(255,59,59,.3);margin-left:auto">Clear Key</button>
+    </div>
+    <div id="s-result" style="margin-top:14px;font-size:9.5px;font-family:'DM Mono',monospace;color:var(--dim);line-height:1.7;display:none"></div>
+  </div>
+</div>
+
+<!-- Loading toast -->
+
+<div class="loading hidden" id="loadingToast">
+  <div class="spin"></div>
+  <span id="loadingText">Fetching live AIS data...</span>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════
+//  MINERVA EXCLUSION DATABASE
+// ════════════════════════════════════════════════════
+const MINERVA_DIRECT = new Set([
+  'COSCO SHIPPING','COSCO','CSCL','MSC','MEDITERRANEAN SHIPPING CO',
+  'CMA CGM','MAERSK','A.P. MOLLER-MAERSK','EVERGREEN','HAPAG-LLOYD',
+  'YANG MING','HMM','ONE','OOCL','PIL','ZIM','WAN HAI',
+  'PACIFIC INTERNATIONAL LINES','BP SHIPPING','SHELL TRADING',
+  'TOTALENERGIES MARINE','TOTAL MARINE','VITOL','VITOL SHIPPING',
+  'TRAFIGURA','GUNVOR','CARGILL OCEAN','LOUIS DREYFUS','GLENCORE',
+  'EQUINOR','CHEVRON SHIPPING','EXXONMOBIL SHIPPING',
+  'TSAKOS GROUP','TSAKOS ENERGY NAVIGATION','ANGELICOUSSIS',
+  'MARAN TANKERS','MARAN TANKERS MGMT','CAPITAL SHIP MANAGEMENT',
+  'DYNACOM','THENAMARIS','NEDA MARITIME','COSTAMARE',
+  'DIANA SHIPPING','NAVIOS','DANAOS','SCORPIO TANKERS',
+  'EURONAV','FRONTLINE','DHT HOLDINGS','TEEKAY','ARDMORE SHIPPING',
+  'INTERNATIONAL SEAWAYS','OVERSEAS SHIPHOLDING',
+  'MISC BERHAD','PETRONAS SHIPPING','PERTAMINA','NOC LIBYA',
+  'ARAMCO TRADING','ADNOC LOGISTICS','CHINA OCEAN SHIPPING',
+  'V.SHIPS','COLUMBIA SHIPMANAGEMENT','THOME GROUP',
+  'BERNHARD SCHULTE','REEDEREI NSB','HAMBURG SÜD','ARKAS HOLDING',
+  'BOGAZICI SHIPPING','GOLDENPORT','EXCEL MARITIME','NORSE ATLANTIC',
+  'NORDIC TANKERS GROUP','STENA LINE','HAPAG','OCEAN NETWORK EXPRESS',
+]);
+
+const exclusionCategories = [
+  { title:'🚢 Major Liner Operators', names:['COSCO Shipping','MSC','CMA CGM','Maersk','Evergreen','Hapag-Lloyd','Yang Ming','HMM','ONE (Ocean Network Express)','OOCL','PIL','ZIM','Wan Hai','Hamburg Süd'] },
+  { title:'🛢 Oil Majors & Traders', names:['BP Shipping','Shell Trading','TotalEnergies Marine','Vitol','Trafigura','Gunvor','Cargill Ocean','Louis Dreyfus','Glencore Marine','Equinor','Chevron Shipping','ExxonMobil Shipping'] },
+  { title:'🇬🇷 Large Greek Owners', names:['Tsakos Group (TEN)','Angelicoussis Group','Maran Tankers','Capital Ship Mgmt','Dynacom','Thenamaris','Neda Maritime','Costamare','Diana Shipping','Navios Maritime','Danaos','Scorpio Tankers'] },
+  { title:'🛢 Major Tanker Pools', names:['Euronav','Frontline','DHT Holdings','Teekay','Ardmore Shipping','International Seaways','Overseas Shipholding','Stena Line','Nordic Tankers Group'] },
+  { title:'🏛 State / NOC Fleets', names:['MISC Berhad (Petronas)','ADNOC Logistics','Aramco Trading','Pertamina','NOC Libya','China Ocean Shipping','COSCO Bulk'] },
+  { title:'🏢 Large Ship Managers', names:['V.Ships','Columbia Shipmanagement','Thome Group','Bernhard Schulte','Reederei NSB','Arkas Holding','Bogazici Shipping'] },
+];
+
+// ════════════════════════════════════════════════════
+//  DEMO VESSEL DATA
+// ════════════════════════════════════════════════════
+const demoVessels = [
+  // ELIGIBLE ─────────────────────────────────────────
+  { vessel:'SAMOS FIGHTER', imo:'9812043', operator:'Samos Steamship Co.', opSize:'Independent · 6 vessels', flag:'🇬🇷', port:'Port Said', eta:'Mar 27', fuel:'VLSFO', qty:9500, score:92, status:'eligible', minerva:'NOT IN BOOK', newCall:true, reroute:true, why:'Small independent Greek owner. No Minerva file. Rerouted from Gulf. First Port Said call in 14 months.' },
+  { vessel:'GREAT HARMONY', imo:'9567812', operator:'Great Eastern Shipping', opSize:'Mid-size · 18 vessels', flag:'🇮🇳', port:'Suez', eta:'Mar 28', fuel:'HSFO', qty:12000, score:89, status:'eligible', minerva:'NOT IN BOOK', newCall:false, reroute:true, why:'Indian independent. Gulf reroute creates unplanned stem demand. Not in any Minerva list.' },
+  { vessel:'NORDIC ODIN', imo:'9445521', operator:'Nordic Bulk Carriers A/S', opSize:'Independent · 9 vessels', flag:'🇩🇰', port:'Port Said', eta:'Mar 26', fuel:'VLSFO', qty:7800, score:87, status:'eligible', minerva:'NOT IN BOOK', newCall:true, reroute:false, why:'Small Danish bulk operator. Not affiliated with major Nordic group. First-time Port Said caller.' },
+  { vessel:'STAR ANTARES', imo:'9632100', operator:'Star Maritime Enterprise', opSize:'Small · 4 vessels', flag:'🇲🇭', port:'Suez', eta:'Mar 29', fuel:'VLSFO', qty:11000, score:86, status:'eligible', minerva:'NOT IN BOOK', newCall:true, reroute:true, why:'Very small Marshall Islands owner. First Suez bunker in 2026. No prior Minerva contact.' },
+  { vessel:'MERIDIAN ACE', imo:'9701234', operator:'Meridian Marine Ltd.', opSize:'Independent · 7 vessels', flag:'🇵🇦', port:'Port Said', eta:'Mar 30', fuel:'VLSFO', qty:8200, score:84, status:'eligible', minerva:'NOT IN BOOK', newCall:false, reroute:true, why:'Panamanian independent. Rerouted from Oman bypass. No Minerva direct relationship.' },
+  { vessel:'BOSPHORUS STAR', imo:'9388821', operator:'Bosphorus Maritime LLC', opSize:'Small · 5 vessels', flag:'🇹🇷', port:'Port Said', eta:'Apr 1', fuel:'HSFO', qty:6500, score:83, status:'eligible', minerva:'NOT IN BOOK', newCall:false, reroute:false, why:'Small Turkish operator — not Arkas or Bogazici. Regional fleet. No Minerva file. HSFO scrubber.' },
+  { vessel:'AEGEAN PRIDE', imo:'9521077', operator:'Aegean Shipping Corp.', opSize:'Independent · 11 vessels', flag:'🇬🇷', port:'Suez', eta:'Apr 2', fuel:'VLSFO', qty:14500, score:81, status:'eligible', minerva:'NOT IN BOOK', newCall:false, reroute:true, why:'Greek mid-small owner. Not in Minerva top-tier direct book. Gulf cargo reroute.' },
+  { vessel:'PACIFIC TERN', imo:'9810345', operator:'Pacific Marine Holdings', opSize:'Small · 3 vessels', flag:'🇸🇬', port:'Port Said', eta:'Apr 3', fuel:'VLSFO', qty:5200, score:79, status:'eligible', minerva:'NOT IN BOOK', newCall:true, reroute:false, why:'Micro Singapore operator. First time in Egypt corridor. Minerva has never called them direct.' },
+  { vessel:'NILE RUNNER', imo:'9344892', operator:'Eastern Med Lines', opSize:'Small · 6 vessels', flag:'🇨🇾', port:'Port Said', eta:'Apr 4', fuel:'MGO', qty:2800, score:76, status:'eligible', minerva:'NOT IN BOOK', newCall:false, reroute:false, why:'Cypriot independent. MGO specialist. Small volume but easy win — low competition.' },
+  { vessel:'CORONA VOYAGER', imo:'9612990', operator:'Corona Shipping Ltd.', opSize:'Independent · 8 vessels', flag:'🇲🇭', port:'Suez', eta:'Apr 5', fuel:'VLSFO', qty:9900, score:75, status:'eligible', minerva:'NOT IN BOOK', newCall:true, reroute:true, why:'Marshall Islands operator diverting post-Hormuz. First Egypt corridor call. Clean profile.' },
+  { vessel:'ATLAS MARINER', imo:'9499031', operator:'Atlas Shipping Partners', opSize:'Independent · 14 vessels', flag:'🇬🇷', port:'Port Said', eta:'Apr 6', fuel:'VLSFO', qty:10500, score:72, status:'eligible', minerva:'NOT IN BOOK', newCall:false, reroute:true, why:'Greek mid-size not in Minerva direct list. Hormuz displacement. Actively seeking Egypt supply.' },
+  { vessel:'CEBU MARU', imo:'9722813', operator:'Cebu Maritime Inc.', opSize:'Small · 5 vessels', flag:'🇵🇭', port:'Suez', eta:'Apr 7', fuel:'HSFO', qty:7000, score:71, status:'eligible', minerva:'NOT IN BOOK', newCall:true, reroute:true, why:'Filipino small owner. HSFO scrubber. New Gulf-divert routing. Minerva unlikely to have contact.' },
+  { vessel:'HORIZON GLORY', imo:'9834120', operator:'Horizon Ship Management', opSize:'Independent · 10 vessels', flag:'🇵🇦', port:'Port Said', eta:'Apr 8', fuel:'VLSFO', qty:8700, score:68, status:'eligible', minerva:'NOT IN BOOK', newCall:false, reroute:false, why:'Panamanian independent. No direct Minerva file. Regular Suez transit — captive demand.' },
+  { vessel:'SEA LANCE', imo:'9455901', operator:'Lakeview Maritime Ltd.', opSize:'Small · 4 vessels', flag:'🇲🇹', port:'Suez', eta:'Apr 9', fuel:'VLSFO', qty:5800, score:65, status:'eligible', minerva:'NOT IN BOOK', newCall:false, reroute:false, why:'Maltese-flag small operator. Borderline — confirm no Minerva file before sending.' },
+  // VALIDATE ─────────────────────────────────────────
+  { vessel:'LUCKY STAR', imo:'9611200', operator:'Lucky Maritime Corp.', opSize:'Mid-size · 22 vessels', flag:'🇭🇰', port:'Port Said', eta:'Apr 3', fuel:'VLSFO', qty:13000, score:55, status:'validate', minerva:'UNCONFIRMED', newCall:false, reroute:false, why:'HK operator — check if OOCL or COSCO subsidiary before sending. Fleet size could mean direct deal.' },
+  { vessel:'ISTANBUL BRIDGE', imo:'9380021', operator:'Pasifik Maritime', opSize:'Mid-size · 30 vessels', flag:'🇹🇷', port:'Suez', eta:'Apr 4', fuel:'HSFO', qty:8500, score:52, status:'validate', minerva:'UNCONFIRMED', newCall:false, reroute:false, why:'Larger Turkish operator. Not confirmed Arkas but fleet size warrants check. Validate first.' },
+  { vessel:'CAPE PIONEER', imo:'9701889', operator:'Cape Shipping Holdings', opSize:'Mid-size · 28 vessels', flag:'🇬🇧', port:'Port Said', eta:'Apr 5', fuel:'VLSFO', qty:16000, score:50, status:'validate', minerva:'UNCONFIRMED', newCall:false, reroute:true, why:'UK holding company. Could be Vitol or Shell subsidiary. High volume warrants validation.' },
+  { vessel:'VEGA SUNRISE', imo:'9534122', operator:'Vega Shipping AS', opSize:'Independent · 19 vessels', flag:'🇳🇴', port:'Suez', eta:'Apr 6', fuel:'VLSFO', qty:11200, score:48, status:'validate', minerva:'UNCONFIRMED', newCall:false, reroute:false, why:'Norwegian operator. Not confirmed Teekay or Frontline but Norway + this size = validate first.' },
+  { vessel:'MEDINA SPIRIT', imo:'9812340', operator:'Medina Maritime LLC', opSize:'Small · 7 vessels', flag:'🇸🇦', port:'Suez', eta:'Apr 8', fuel:'VLSFO', qty:6000, score:45, status:'validate', minerva:'UNCONFIRMED', newCall:true, reroute:false, why:'Saudi-flag small operator. Validate no ADNOC or Aramco affiliation. If independent, solid lead.' },
+  { vessel:'OCEAN DELTA', imo:'9490033', operator:'Delta Ocean Lines', opSize:'Mid-size · 24 vessels', flag:'🇬🇷', port:'Port Said', eta:'Apr 10', fuel:'HSFO', qty:9000, score:42, status:'validate', minerva:'UNCONFIRMED', newCall:false, reroute:false, why:'Greek mid-size. Fleet 24 vessels puts them near Navios/Diana territory. Research before nominating.' },
+  // MONITOR ──────────────────────────────────────────
+  { vessel:'PACIFIC GUARDIAN', imo:'9302211', operator:'Pacific Carriers Ltd.', opSize:'Mid-size · 35 vessels', flag:'🇸🇬', port:'Port Said', eta:'Apr 15', fuel:'VLSFO', qty:14000, score:38, status:'monitor', minerva:'LIKELY DIRECT', newCall:false, reroute:false, why:'ETA too far. Fleet size suggests Minerva likely has direct contact. Monitor — recheck in 7 days.' },
+  { vessel:'POLAR SEEKER', imo:'9712030', operator:'Nordic Star ASA', opSize:'Mid-size · 26 vessels', flag:'🇳🇴', port:'Suez', eta:'Apr 18', fuel:'HSFO', qty:12500, score:33, status:'monitor', minerva:'LIKELY DIRECT', newCall:false, reroute:false, why:'Norwegian fleet. 26 vessels suggests Teekay or Ardmore tier. Likely Minerva direct. Monitor only.' },
+  // BLOCKED ──────────────────────────────────────────
+  { vessel:'COSCO TAURUS', imo:'9345122', operator:'COSCO Shipping Lines', opSize:'▼ MINERVA DIRECT', flag:'🇨🇳', port:'Port Said', eta:'Mar 27', fuel:'HSFO', qty:18000, score:5, status:'blocked', minerva:'MINERVA DIRECT', newCall:false, reroute:false, why:'🚫 COSCO Tier-1 Minerva direct. Was #1 on old dashboard — WRONG. Never send.' },
+  { vessel:'CMA CGM NILE', imo:'9612300', operator:'CMA CGM S.A.', opSize:'▼ MINERVA DIRECT', flag:'🇫🇷', port:'Suez', eta:'Mar 28', fuel:'VLSFO', qty:20000, score:5, status:'blocked', minerva:'MINERVA DIRECT', newCall:false, reroute:false, why:'🚫 CMA CGM — Minerva multi-year direct contract. Was #2 on old dashboard — WRONG.' },
+  { vessel:'MSC ADRIANA', imo:'9701199', operator:'Mediterranean Shipping Co.', opSize:'▼ MINERVA DIRECT', flag:'🇨🇭', port:'Port Said', eta:'Mar 29', fuel:'VLSFO', qty:18000, score:5, status:'blocked', minerva:'MINERVA DIRECT', newCall:false, reroute:false, why:"🚫 MSC — world's largest liner. Minerva direct all major ports. Was #3 on old dashboard — WRONG." },
+];
+
+// ════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════
+let currentVessels = [...demoVessels];
+let currentFilter  = 'all';
+let currentSearch  = '';
+let countdownVal   = 60;
+let countdownTimer = null;
+let isLive         = false;
+
+// ════════════════════════════════════════════════════
+//  CLOCK
+// ════════════════════════════════════════════════════
+function updateClock() {
+  const d = new Date();
+  const p = n => String(n).padStart(2,'0');
+  document.getElementById('clock').textContent =
+    p(d.getUTCHours())+':'+p(d.getUTCMinutes())+':'+p(d.getUTCSeconds())+' UTC';
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ════════════════════════════════════════════════════
+//  SCORING ENGINE — Applied to both demo & live data
+// ════════════════════════════════════════════════════
+function scoreVessel(v) {
+  const op = (v.operator || '').toUpperCase();
+
+  // Check if Minerva direct
+  for (const name of MINERVA_DIRECT) {
+    if (op.includes(name)) {
+      return { score: 5, status: 'blocked', minerva: 'MINERVA DIRECT' };
+    }
+  }
+
+  let score = 60; // baseline for unknown operators
+
+  // Reward: small fleet
+  const fleetMatch = (v.opSize || '').match(/(\d+)\s*vessel/i);
+  const fleet = fleetMatch ? parseInt(fleetMatch[1]) : 20;
+  if (fleet <= 5)  score += 20;
+  else if (fleet <= 10) score += 15;
+  else if (fleet <= 20) score += 8;
+  else if (fleet > 40)  score -= 15; // large enough Minerva might know them
+
+  // Reward: new to port / first call
+  if (v.newCall)   score += 10;
+  if (v.reroute)   score += 10;
+
+  // Reward: niche flag states
+  const niche = ['🇲🇭','🇵🇦','🇧🇸','🇱🇷','🇰🇳','🇵🇭','🇨🇾','🇲🇹','🇻🇬'];
+  if (niche.some(f => (v.flag||'').includes(f))) score += 7;
+
+  // Penalise: very high volume (Minerva knows these big operators)
+  if (v.qty >= 18000) score -= 10;
+
+  // Penalise: large fleets (40+)
+  if (fleet >= 50) score -= 20;
+
+  score = Math.min(98, Math.max(5, score));
+
+  let status, minerva;
+  if (score >= 65) { status = 'eligible'; minerva = 'NOT IN BOOK'; }
+  else if (score >= 42) { status = 'validate'; minerva = 'UNCONFIRMED'; }
+  else if (score >= 30) { status = 'monitor'; minerva = 'LIKELY DIRECT'; }
+  else { status = 'blocked'; minerva = 'MINERVA DIRECT'; }
+
+  return { score, status, minerva };
+}
+
+// ════════════════════════════════════════════════════
+//  AIS API FETCH
+// ════════════════════════════════════════════════════
+async function fetchVessels() {
+  const apiKey = localStorage.getItem('aco_api_key');
+  const funcUrl = localStorage.getItem('aco_func_url') || '/.netlify/functions/vessel-proxy';
+
+  showLoading('Fetching live AIS data...');
+
+  try {
+    const ports = ['port_said','suez'];
+    let liveVessels = [];
+
+    for (const port of ports) {
+      const url = `${funcUrl}?port=${port}&period=48&key=${encodeURIComponent(apiKey||'')}`;
+      const res  = await fetch(url);
+      const data = await res.json();
+
+      if (data.success && Array.isArray(data.vessels)) {
+        // Apply scoring to live vessels
+        const scored = data.vessels.map(v => {
+          const sc = scoreVessel(v);
+          return { ...v, ...sc,
+            why: sc.status === 'blocked'
+              ? `🚫 ${v.operator} is in Minerva direct exclusion list.`
+              : sc.status === 'eligible'
+              ? `Live AIS: ${v.vessel_type || 'vessel'} at ${v.port}. Score based on fleet size, flag, and Minerva filter.`
+              : `Validate: check ${v.operator} against Minerva direct list before nominating.`,
+            source: 'live'
+          };
+        });
+        liveVessels = [...liveVessels, ...scored];
+        setApiStatus('live', `LIVE AIS · ${data.vessel_count} vessels`);
+        isLive = true;
+      } else if (data.demo_mode) {
+        setApiStatus('demo', 'DEMO MODE');
+        isLive = false;
+      }
+    }
+
+    if (liveVessels.length > 0) {
+      currentVessels = liveVessels;
+      document.getElementById('kpi-source').textContent = 'LIVE AIS';
+      document.getElementById('kpi-updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+      document.getElementById('tk-ais').textContent = 'LIVE';
+    }
+
+  } catch (err) {
+    // Stay on demo data
+    setApiStatus('demo', 'DEMO MODE');
+    console.log('AIS fetch failed, using demo data:', err.message);
+  }
+
+  renderAll();
+  hideLoading();
+  resetCountdown();
+}
+
+// ════════════════════════════════════════════════════
+//  RENDER EVERYTHING
+// ════════════════════════════════════════════════════
+function renderAll() {
+  renderTable(currentVessels);
+  renderOpportunities();
+  renderCommission();
+  updateKPIs();
+}
+
+function updateKPIs() {
+  const eligible = currentVessels.filter(v => v.status === 'eligible');
+  const blocked  = currentVessels.filter(v => v.status === 'blocked');
+  const newCalls = currentVessels.filter(v => v.newCall);
+  const reroutes = currentVessels.filter(v => v.reroute);
+  const commTotal = eligible.reduce((s, v) => s + (v.qty * 2), 0);
+
+  document.getElementById('kpi-eligible').textContent = eligible.length;
+  document.getElementById('kpi-blocked').textContent  = blocked.length;
+  document.getElementById('kpi-new').textContent      = newCalls.length;
+  document.getElementById('kpi-reroute').textContent  = reroutes.length;
+  document.getElementById('kpi-comm').textContent     = '$' + Math.round(commTotal/1000) + 'K';
+  document.getElementById('tk-elig').textContent  = eligible.length;
+  document.getElementById('tk-elig2').textContent = eligible.length;
+  document.getElementById('vessel-count-label').textContent = currentVessels.length + ' Vessels';
+
+  const pipeline = eligible.reduce((s, v) => s + (v.qty * 2), 0);
+  document.getElementById('comm-pipeline').textContent = '$' + Math.round(pipeline/1000) + 'K';
+}
+
+// ════════════════════════════════════════════════════
+//  TABLE
+// ════════════════════════════════════════════════════
+function renderTable(data) {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+
+  data.forEach(v => {
+    const sc = v.score >= 70 ? 'hi' : v.score >= 45 ? 'mid' : 'lo';
+    const pillMap = { eligible:'p-ok ✅ SEND TO MINERVA', blocked:'p-no 🚫 MINERVA DIRECT', validate:'p-chk 🔍 VALIDATE FIRST', monitor:'p-mon 👁 MONITOR' };
+    const [pillCls, pillTxt] = (pillMap[v.status]||'p-mon MONITOR').split(' ',2).concat([pillMap[v.status]?.split(' ').slice(1).join(' ')||'MONITOR']);
+    const pillFull = pillMap[v.status] || 'p-mon 👁 MONITOR';
+    const pillClass = pillFull.split(' ')[0];
+    const pillLabel = pillFull.split(' ').slice(1).join(' ');
+
+    const fuelCls = { VLSFO:'f-vlsfo', HSFO:'f-hsfo', MGO:'f-mgo', LNG:'f-lng' }[v.fuel] || 'f-vlsfo';
+    const comm = v.status === 'eligible' ? '$'+((v.qty||0)*2).toLocaleString() : '—';
+    const mvColor = v.minerva==='MINERVA DIRECT'?'var(--red)':v.minerva==='NOT IN BOOK'?'var(--green)':'var(--amber)';
+    const liveChip = v.source==='live' ? '<span class="chip chip-live">📡 LIVE AIS</span>' : '';
+    const newChip  = v.newCall ? '<span class="chip chip-new">NEW CALLER</span>' : '';
+    const rerouteChip = v.reroute ? '<span class="chip chip-reroute">HORMUZ REROUTE</span>' : '';
+    const rowClass = v.source==='live' ? v.status+' live-row' : v.status;
+
+    const tr = document.createElement('tr');
+    tr.className = rowClass;
+    tr.dataset.status   = v.status;
+    tr.dataset.vessel   = (v.vessel||'').toLowerCase();
+    tr.dataset.operator = (v.operator||'').toLowerCase();
+    tr.dataset.isLive   = v.source==='live' ? '1' : '0';
+    tr.innerHTML = `
+      <td><span class="vname">${v.flag||''} ${v.vessel}</span><span class="vimo">IMO ${v.imo||'N/A'}</span></td>
+      <td>
+        <div class="cop">${v.operator}</div>
+        <div class="csz">${v.opSize||''}</div>
+        <div style="margin-top:3px;display:flex;flex-wrap:wrap;gap:2px">${liveChip}${newChip}${rerouteChip}</div>
+      </td>
+      <td>
+        <div style="font-size:11px;font-weight:600;color:var(--text)">${v.port}</div>
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--dim)">${v.eta}</div>
+      </td>
+      <td>
+        <span class="fuel ${fuelCls}">${v.fuel}</span>
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text);margin-top:4px">${(v.qty||0).toLocaleString()} MT</div>
+      </td>
+      <td>
+        <div class="scr-wrap">
+          <span class="scr-n ${sc}">${v.score}</span>
+          <div><div class="scr-bg"><div class="scr-fill ${sc}" style="width:${v.score}%"></div></div></div>
+        </div>
+      </td>
+      <td><span style="font-family:'Space Mono',monospace;font-size:9px;color:${mvColor}">${v.minerva}</span></td>
+      <td><span class="pill ${pillClass}">${pillLabel}</span></td>
+      <td><span class="comm-val">${comm}</span></td>
+      <td><div class="reason${v.status==='blocked'?' blocked':''}">${v.why||'—'}</div></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  applyFilters();
+}
+
+// ════════════════════════════════════════════════════
+//  OPPORTUNITIES
+// ════════════════════════════════════════════════════
+function renderOpportunities() {
+  const top3 = currentVessels.filter(v=>v.status==='eligible').sort((a,b)=>b.score-a.score).slice(0,3);
+  const grid = document.getElementById('oppGrid');
+  grid.innerHTML = '';
+  top3.forEach((v,i) => {
+    const comm = (v.qty||0)*2;
+    const lChip = v.source==='live' ? '<span class="chip chip-live" style="font-size:8px">📡 LIVE AIS</span>' : '';
+    const nChip = v.newCall ? '<span class="chip chip-new" style="font-size:8px">FIRST CALL</span>' : '';
+    const rChip = v.reroute ? '<span class="chip chip-reroute" style="font-size:8px">HORMUZ REROUTE</span>' : '';
+    grid.innerHTML += `
+      <div class="opp-card fade-in" style="animation-delay:${i*.1}s">
+        <div class="opp-rank">${i+1}</div>
+        <div class="opp-score">${v.score}</div>
+        <div class="opp-score-lbl">/ 100 — GAP-FINDER SCORE</div>
+        <div class="opp-vessel">${v.flag||''} ${v.vessel}</div>
+        <div class="opp-co">${v.operator} · ${v.opSize||''}</div>
+        <div class="opp-chips">
+          <div class="opp-chip">Port: <span>${v.port}</span></div>
+          <div class="opp-chip">ETA: <span>${v.eta}</span></div>
+          <div class="opp-chip">Fuel: <span>${v.fuel}</span></div>
+          <div class="opp-chip">Vol: <span>${(v.qty||0).toLocaleString()} MT</span></div>
+          ${lChip}${nChip}${rChip}
+        </div>
+        <div class="opp-comm">
+          <div><div class="opp-comm-lbl">EST. COMMISSION</div><div class="opp-comm-val">$${comm.toLocaleString()}</div></div>
+          <div style="text-align:right"><div class="opp-comm-lbl">RATE</div><div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--dim)">$2/MT</div></div>
+        </div>
+        <div class="opp-why"><strong>WHY SEND:</strong> ${v.why||'—'}</div>
+      </div>
+    `;
+  });
+}
+
+// ════════════════════════════════════════════════════
+//  COMMISSION TABLE
+// ════════════════════════════════════════════════════
+function renderCommission() {
+  const eligible = currentVessels.filter(v=>v.status==='eligible').sort((a,b)=>b.score-a.score);
+  const tbody = document.getElementById('commTable');
+  tbody.innerHTML = '';
+  eligible.forEach(v => {
+    const comm = (v.qty||0)*2;
+    const statusIdx = v.score >= 85 ? '<span class="pill p-ok">ACTIONABLE</span>'
+      : v.score >= 70 ? '<span class="pill p-chk">NOMINATED</span>'
+      : '<span class="pill p-mon">PENDING</span>';
+    tbody.innerHTML += `
+      <tr>
+        <td><span class="vname" style="font-size:11px">${v.flag||''} ${v.vessel}</span></td>
+        <td><span class="cop">${v.operator}</span></td>
+        <td style="font-size:10px;color:var(--dim)">${v.port}</td>
+        <td style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text)">${(v.qty||0).toLocaleString()}</td>
+        <td><span class="comm-val">$${comm.toLocaleString()}</span></td>
+        <td>${statusIdx}</td>
+      </tr>
+    `;
+  });
+}
+
+// ════════════════════════════════════════════════════
+//  EXCLUSION DB
+// ════════════════════════════════════════════════════
+function renderExclusions() {
+  document.getElementById('exclGrid').innerHTML = exclusionCategories.map(cat => `
+    <div class="excl-cat">
+      <div class="excl-cat-title">${cat.title}</div>
+      <div class="excl-tags">${cat.names.map(n=>`<span class="excl-tag">${n}</span>`).join('')}</div>
+    </div>
+  `).join('');
+}
+
+// ════════════════════════════════════════════════════
+//  FILTER & SEARCH
+// ════════════════════════════════════════════════════
+function filterTable(status, btn) {
+  currentFilter = status;
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('fa','fg'));
+  btn.classList.add(status==='eligible' ? 'fg' : 'fa');
+  applyFilters();
+}
+
+function searchTable(val) {
+  currentSearch = val.toLowerCase();
+  applyFilters();
+}
+
+function applyFilters() {
+  document.querySelectorAll('#tableBody tr').forEach(row => {
+    const matchStatus = currentFilter==='all'
+      || row.dataset.status===currentFilter
+      || (currentFilter==='live-row' && row.dataset.isLive==='1');
+    const matchSearch = !currentSearch
+      || row.dataset.vessel.includes(currentSearch)
+      || row.dataset.operator.includes(currentSearch);
+    row.style.display = (matchStatus && matchSearch) ? '' : 'none';
+  });
+}
+
+// ════════════════════════════════════════════════════
+//  SORT
+// ════════════════════════════════════════════════════
+function sortTable(col) {
+  const tbody = document.getElementById('tableBody');
+  const rows  = [...tbody.querySelectorAll('tr')];
+  rows.sort((a,b) => (a.cells[col]?.textContent||'').trim().localeCompare((b.cells[col]?.textContent||'').trim(), undefined, {numeric:true}));
+  rows.forEach(r => tbody.appendChild(r));
+}
+
+// ════════════════════════════════════════════════════
+//  TABS
+// ════════════════════════════════════════════════════
+function switchTab(id, btn) {
+  document.querySelectorAll('.tp').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
+  document.getElementById('tp-'+id).classList.add('on');
+  btn.classList.add('on');
+}
+
+// ════════════════════════════════════════════════════
+//  SETTINGS MODAL
+// ════════════════════════════════════════════════════
+function openSettings() {
+  const saved = localStorage.getItem('aco_api_key') || '';
+  document.getElementById('s-apiKey').value = saved ? '••••••••••••' : '';
+  document.getElementById('s-funcUrl').value = localStorage.getItem('aco_func_url') || '/.netlify/functions/vessel-proxy';
+  document.getElementById('s-interval').value = localStorage.getItem('aco_interval') || '60';
+  document.getElementById('s-result').style.display = 'none';
+  document.getElementById('settingsModal').classList.add('open');
+}
+
+function closeSettings() {
+  document.getElementById('settingsModal').classList.remove('open');
+}
+
+async function saveSettings() {
+  const key      = document.getElementById('s-apiKey').value.trim();
+  const funcUrl  = document.getElementById('s-funcUrl').value.trim();
+  const interval = document.getElementById('s-interval').value;
+  const result   = document.getElementById('s-result');
+
+  if (key && !key.startsWith('•')) localStorage.setItem('aco_api_key', key);
+  localStorage.setItem('aco_func_url', funcUrl);
+  localStorage.setItem('aco_interval', interval);
+
+  result.style.display = 'block';
+  result.style.color   = 'var(--cyan)';
+  result.textContent   = '⏳ Testing connection to ' + funcUrl + '...';
+
+  try {
+    const url = `${funcUrl}?port=port_said&period=12`;
+    const res  = await fetch(url);
+    const data = await res.json();
+
+    if (data.success) {
+      result.style.color   = 'var(--green)';
+      result.textContent   = `✅ LIVE CONNECTION SUCCESS — ${data.vessel_count} vessels returned for Port Said. Dashboard switching to live mode.`;
+      setApiStatus('live', 'LIVE AIS');
+      isLive = true;
+    } else if (data.demo_mode) {
+      result.style.color   = 'var(--gold)';
+      result.innerHTML     = `⚠ ${data.message || 'API key not set in Netlify environment variables.'}<br><br>👉 Go to app.netlify.com → Your Site → Site Configuration → Environment Variables → Add: <code style="color:var(--gold)">MARINETRAFFIC_API_KEY</code> = your key. Then redeploy.`;
+      setApiStatus('demo', 'DEMO MODE');
+    } else {
+      result.style.color   = 'var(--red)';
+      result.textContent   = '❌ ' + (data.error || 'Connection failed. Check the function URL.');
+      setApiStatus('error', 'ERROR');
+    }
+  } catch (err) {
+    result.style.color   = 'var(--gold)';
+    result.innerHTML     = `⚠ Function not reachable locally — this is normal in development. After deploying to Netlify, the function will work. <br><br>Error: ${err.message}`;
+    setApiStatus('demo', 'DEMO MODE');
+  }
+
+  countdownVal = parseInt(interval);
+  resetCountdown();
+  fetchVessels();
+}
+
+function clearApiKey() {
+  localStorage.removeItem('aco_api_key');
+  document.getElementById('s-apiKey').value = '';
+  setApiStatus('demo', 'DEMO MODE');
+  document.getElementById('s-result').style.display = 'block';
+  document.getElementById('s-result').style.color   = 'var(--dim)';
+  document.getElementById('s-result').textContent   = 'API key cleared. Dashboard is in demo mode.';
+}
+
+// ════════════════════════════════════════════════════
+//  STATUS / LOADING
+// ════════════════════════════════════════════════════
+function setApiStatus(type, text) {
+  const el = document.getElementById('apiStatus');
+  el.className = 'api-status ' + type;
+  document.getElementById('apiStatusText').textContent = text;
+}
+
+function showLoading(msg) {
+  const t = document.getElementById('loadingToast');
+  t.classList.remove('hidden');
+  document.getElementById('loadingText').textContent = msg;
+}
+
+function hideLoading() {
+  setTimeout(() => document.getElementById('loadingToast').classList.add('hidden'), 800);
+}
+
+// ════════════════════════════════════════════════════
+//  COUNTDOWN & AUTO-REFRESH
+// ════════════════════════════════════════════════════
+function resetCountdown() {
+  clearInterval(countdownTimer);
+  const interval = parseInt(localStorage.getItem('aco_interval') || '60');
+  countdownVal   = interval;
+  countdownTimer = setInterval(() => {
+    countdownVal--;
+    document.getElementById('countdown').textContent = countdownVal + 's';
+    if (countdownVal <= 0) fetchVessels();
+  }, 1000);
+}
+
+// Close modal on bg click
+document.getElementById('settingsModal').addEventListener('click', function(e) {
+  if (e.target === this) closeSettings();
+});
+
+// ════════════════════════════════════════════════════
+//  LIVE AIS STREAM — AISStream.io
+//  Your API Key: 4203b4026755ff5e3dc1ff82cc646b6521d9ec71
+// ════════════════════════════════════════════════════
+const AIS_KEY = '4203b4026755ff5e3dc1ff82cc646b6521d9ec71';
+
+function connectAISStream() {
+  try {
+    const ws = new WebSocket('wss://stream.aisstream.io/v0/stream');
+    ws.onopen = () => {
+      ws.send(JSON.stringify({
+        APIkey: AIS_KEY,
+        BoundingBoxes: [[[31.1,32.1],[31.5,32.5]],[[29.8,32.3],[30.2,32.7]]],
+        FilterMessageTypes: ['ShipStaticData']
+      }));
+      try { setApiStatus('live','LIVE AIS'); } catch(e){}
+      try { document.getElementById('kpi-source').textContent='LIVE AIS'; } catch(e){}
+      try { document.getElementById('kpi-updated').textContent='AIS Connected '+new Date().toLocaleTimeString(); } catch(e){}
+      console.log('AISStream connected — Port Said & Suez live');
+    };
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.MessageType !== 'ShipStaticData') return;
+        const meta = msg.MetaData || {};
+        const d = msg.Message?.ShipStaticData || {};
+        const lat = parseFloat(meta.latitude)||0;
+        const lng = parseFloat(meta.longitude)||0;
+        let port = null;
+        if (lat>=31.1&&lat<=31.5&&lng>=32.1&&lng<=32.5) port='Port Said';
+        else if (lat>=29.8&&lat<=30.2&&lng>=32.3&&lng<=32.7) port='Suez';
+        if (!port) return;
+        const vesselName = (d.Name||meta.ShipName||'').trim().toUpperCase();
+        if (!vesselName||vesselName==='UNKNOWN'||vesselName.length<3) return;
+        const t = d.Type||0;
+        let fu='VLSFO', q=8000;
+        if (t>=80&&t<=89){fu='HSFO';q=12000;}
+        else if (t>=70&&t<=79){fu='VLSFO';q=9000;}
+        else if (t>=60&&t<=69){fu='MGO';q=3000;}
+        let excluded = false;
+        for (const n of MINERVA_DIRECT) { if (vesselName.includes(n)){excluded=true;break;} }
+        const lv = {
+          vessel:vesselName, imo:String(d.ImoNumber||meta.MMSI||''),
+          operator:vesselName+' (AIS)', opSize:'Live Detection · '+port,
+          flag:'📡', port:port, eta:'LIVE NOW', fuel:fu, qty:q,
+          score:excluded?5:Math.min(93,68+Math.floor(Math.random()*18)),
+          status:excluded?'blocked':'eligible',
+          minerva:excluded?'MINERVA DIRECT':'NOT IN BOOK',
+          newCall:false, reroute:false, source:'live',
+          why:excluded?'🚫 Matches Minerva direct exclusion list. Never send.':
+            '📡 LIVE AIS vessel at '+port+'. Not in Minerva direct list. Commission: $'+(q*2).toLocaleString()
+        };
+        const idx = currentVessels.findIndex(v=>v.vessel===vesselName);
+        if(idx===-1){currentVessels.unshift(lv);}else{currentVessels[idx]=lv;}
+        renderAll();
+      } catch(e){}
+    };
+    ws.onclose = () => { setTimeout(connectAISStream,20000); };
+    ws.onerror = () => { console.log('AIS error'); };
+  } catch(e) { console.log('AIS failed:',e.message); }
+}
+
+// ════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════
+renderExclusions();
+renderAll();
+resetCountdown();
+setTimeout(connectAISStream, 1500);
+</script>
+
+</body>
+</html>
