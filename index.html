@@ -735,3 +735,19 @@ function exportDashboardPDF() {
     console.log("Exporting PDF");
     alert("PDF export triggered");
 }
+function openSettings() {
+    const modal = document.getElementById("settingsModal");
+    if (modal) {
+        modal.style.display = "block";
+    } else {
+        alert("Settings panel coming soon.");
+    }
+}
+
+function switchTab(tabName) {
+    console.log("Switching tab:", tabName);
+}
+
+function filterTable() {
+    console.log("Filtering table...");
+}
