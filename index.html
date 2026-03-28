@@ -751,3 +751,118 @@ function switchTab(tabName) {
 function filterTable() {
     console.log("Filtering table...");
 }
+<script>
+(function () {
+  function byId(id) {
+    return document.getElementById(id);
+  }
+
+  window.openSettings = function () {
+    const modal =
+      byId("settingsModal") ||
+      byId("settingsPanel") ||
+      byId("settingsDrawer");
+
+    if (modal) {
+      modal.style.display = "block";
+      modal.classList.remove("hidden");
+      modal.classList.add("open");
+      return;
+    }
+
+    alert("Settings panel not found in the page.");
+  };
+
+  window.closeSettings = function () {
+    const modal =
+      byId("settingsModal") ||
+      byId("settingsPanel") ||
+      byId("settingsDrawer");
+
+    if (modal) {
+      modal.style.display = "none";
+      modal.classList.add("hidden");
+      modal.classList.remove("open");
+    }
+  };
+
+  window.exportDashboardPDF = function () {
+    alert("PDF export is not wired yet.");
+  };
+
+  window.fetchVessels = async function () {
+    try {
+      const toast = byId("loadingToast");
+      if (toast) toast.classList.remove("hidden");
+
+      const res = await fetch("/.netlify/functions/vessel-proxy");
+      const data = await res.json();
+      console.log("vessel-proxy response:", data);
+
+      const badge =
+        byId("aisSourceBadge") ||
+        byId("aisSource") ||
+        byId("feedMode");
+
+      if (badge && data && data.ok) {
+        badge.textContent = "LIVE";
+      }
+
+      const countEl =
+        byId("vesselCount") ||
+        byId("aisCount") ||
+        byId("liveCount");
+
+      if (countEl && data && typeof data.vessel_count !== "undefined") {
+        countEl.textContent = data.vessel_count;
+      }
+
+      return data;
+    } catch (err) {
+      console.error("fetchVessels failed:", err);
+      alert("Failed to fetch vessels.");
+    } finally {
+      const toast = byId("loadingToast");
+      if (toast) toast.classList.add("hidden");
+    }
+  };
+
+  window.switchTab = function (tabName) {
+    document.querySelectorAll("[data-tab]").forEach((el) => {
+      el.classList.add("hidden");
+    });
+
+    document.querySelectorAll("[data-tab-button]").forEach((el) => {
+      el.classList.remove("active");
+    });
+
+    const target =
+      document.querySelector('[data-tab="' + tabName + '"]') ||
+      byId(tabName);
+
+    if (target) target.classList.remove("hidden");
+
+    const btn =
+      document.querySelector('[data-tab-button="' + tabName + '"]');
+
+    if (btn) btn.classList.add("active");
+
+    console.log("Switched tab:", tabName);
+  };
+
+  window.filterTable = function () {
+    console.log("filterTable called");
+  };
+
+  window.applyFilters = function () {
+    console.log("applyFilters called");
+    if (typeof window.filterTable === "function") {
+      window.filterTable();
+    }
+  };
+
+  document.addEventListener("DOMContentLoaded", function () {
+    console.log("Global UI shim loaded");
+  });
+})();
+</script>
