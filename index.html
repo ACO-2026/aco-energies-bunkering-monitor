@@ -693,7 +693,43 @@ const MINERVA_DIRECT = new Set([
   'V.SHIPS','COLUMBIA SHIPMANAGEMENT','THOME GROUP','BERNHARD SCHULTE','REEDEREI NSB',
   'HAMBURG SUD','ARKAS HOLDING','BOGAZICI SHIPPING'
 ]);
-
+  
 const exclusionCategories = [
   {title:'🚢 Major Liner Operators',names:['COSCO Shipping','MSC','CMA CGM','Maersk','Evergreen','Hapag-Lloyd','Yang Ming','HMM','ONE','OOCL','PIL','ZIM','Wan Hai']},
   {title:'🛢 Oil Majors & Traders',names:['BP Shipping','Shell Trading','TotalEnergies Marine','Vitol','Trafigura','Gunvor','Cargill Ocean','Louis Dreyf`}
+function openSettings() {
+    console.log("Opening settings");
+
+    const modal = document.getElementById("settingsModal");
+
+    if (modal) {
+        modal.style.display = "block";
+    }
+}
+
+function closeSettings() {
+    const modal = document.getElementById("settingsModal");
+
+    if (modal) {
+        modal.style.display = "none";
+    }
+}
+
+function fetchVessels() {
+    console.log("Fetching vessels");
+
+    const toast = document.getElementById("loadingToast");
+
+    if (toast) {
+        toast.classList.remove("hidden");
+
+        setTimeout(() => {
+            toast.classList.add("hidden");
+        }, 2000);
+    }
+}
+
+function exportDashboardPDF() {
+    console.log("Exporting PDF");
+    alert("PDF export triggered");
+}
