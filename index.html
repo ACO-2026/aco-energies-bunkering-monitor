@@ -1,930 +1,578 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ACO Energies, Deal Origination Dashboard v3</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ACO Energies — Deal Origination Dashboard v4</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#040810;
-  --navy:#070e1c;
-  --panel:#0b1524;
-  --panel2:#0f1d30;
-  --panel3:#132438;
-  --border:#182c48;
-  --border2:#1f3d63;
-  --gold:#f5c842;
-  --amber:#ff9500;
-  --green:#00e676;
-  --red:#ff3b3b;
-  --orange:#ff6b35;
-  --blue:#4a9eff;
-  --cyan:#00d4ff;
-  --text:#e2e8f4;
-  --dim:#5a7ea0;
-  --muted:#2f4a68;
-}
+:root{--bg:#040810;--navy:#070e1c;--panel:#0b1524;--panel2:#0f1d30;--border:#182c48;--border2:#1f3d63;--gold:#f5c842;--amber:#ff9500;--green:#00e676;--red:#ff3b3b;--orange:#ff6b35;--blue:#4a9eff;--cyan:#00d4ff;--text:#e2e8f4;--dim:#5a7ea0;--muted:#2f4a68}
 *{margin:0;padding:0;box-sizing:border-box}
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:'Syne',sans-serif;
-  min-height:100vh;
-  overflow-x:hidden;
-}
-body::after{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:9000;
-  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.025) 3px,rgba(0,0,0,.025) 4px);
-}
-.hdr{
-  position:sticky;
-  top:0;
-  z-index:500;
-  background:linear-gradient(180deg,#060d1e 0%,#080f1e 100%);
-  border-bottom:1px solid var(--border2);
-  box-shadow:0 2px 40px rgba(0,0,0,.6);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 22px;
-  height:64px;
-}
+body{background:var(--bg);color:var(--text);font-family:Syne,sans-serif;min-height:100vh;overflow-x:hidden}
+.hdr{position:sticky;top:0;z-index:500;background:linear-gradient(180deg,#060d1e,#080f1e);border-bottom:1px solid var(--border2);box-shadow:0 2px 40px rgba(0,0,0,.6);display:flex;align-items:center;justify-content:space-between;padding:0 22px;min-height:64px;flex-wrap:wrap;gap:8px}
 .hdr-brand{display:flex;align-items:center;gap:14px}
-.brand-logo{height:38px;width:auto;display:block;object-fit:contain}
-.brand-col{display:flex;flex-direction:column;gap:2px}
+.logo-pill{background:#fff;border-radius:6px;padding:4px 8px;box-shadow:0 0 14px rgba(0,201,167,.3);border:1px solid rgba(0,201,167,.35)}
+.logo-pill img{height:36px;display:block}
 .brand-name{font-size:14px;font-weight:800;color:var(--gold);letter-spacing:.1em}
-.brand-sub{font-size:8px;color:var(--dim);letter-spacing:.2em;font-family:'Space Mono',monospace}
-.hdr-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
-.api-status{
-  display:flex;align-items:center;gap:7px;padding:5px 12px;border-radius:4px;
-  font-size:9px;font-family:'Space Mono',monospace;letter-spacing:.08em;transition:all .2s;cursor:pointer;
-}
-.api-status.live{background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.2);color:var(--green)}
-.api-status.demo{background:rgba(245,200,66,.07);border:1px solid rgba(245,200,66,.2);color:var(--gold)}
-.api-status.error{background:rgba(255,59,59,.07);border:1px solid rgba(255,59,59,.2);color:var(--red)}
-.status-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:blink 1.3s infinite}
+.brand-sub{font-size:8px;color:var(--dim);letter-spacing:.2em;font-family:Space Mono,monospace}
+.hdr-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.status-badge{display:flex;align-items:center;gap:7px;padding:5px 12px;border-radius:4px;font-size:9px;font-family:Space Mono,monospace;letter-spacing:.08em;cursor:pointer;transition:all .2s}
+.status-badge.demo{background:rgba(245,200,66,.07);border:1px solid rgba(245,200,66,.2);color:var(--gold)}
+.status-badge.live{background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.2);color:var(--green)}
+.status-badge.err{background:rgba(255,59,59,.07);border:1px solid rgba(255,59,59,.2);color:var(--red)}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:blink 1.3s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
-.refresh-btn,.settings-btn,.action-btn,.fbtn,.btn-primary,.btn-secondary{cursor:pointer;transition:all .2s}
-.refresh-btn{
-  background:rgba(245,200,66,.07);
-  border:1px solid rgba(245,200,66,.2);
-  border-radius:4px;
-  padding:6px 12px;
-  color:var(--gold);
-  font-size:9px;
-  font-family:'Space Mono',monospace;
-  letter-spacing:.08em;
-}
-.refresh-btn:hover{background:rgba(245,200,66,.15)}
-.settings-btn{
-  background:var(--panel2);
-  border:1px solid var(--border);
-  border-radius:4px;
-  width:32px;height:32px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:15px;color:var(--dim);
-}
-.settings-btn:hover{border-color:var(--gold);color:var(--gold)}
-.action-btn{
-  background:var(--panel2);
-  border:1px solid var(--border);
-  border-radius:4px;
-  padding:5px 8px;
-  color:var(--text);
-  font-size:8px;
-  font-family:'Space Mono',monospace;
-  margin:2px 4px 2px 0;
-}
-.action-btn:hover{border-color:var(--gold);color:var(--gold)}
-#clock{font-family:'Space Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.05em}
-.refresh-info{
-  font-family:'Space Mono',monospace;
-  font-size:9px;
-  color:var(--muted);
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-.ticker{
-  background:rgba(245,200,66,.04);
-  border-bottom:1px solid rgba(245,200,66,.1);
-  height:30px;
-  overflow:hidden;
-  display:flex;
-  align-items:center;
-}
-.ticker-track{
-  display:flex;
-  white-space:nowrap;
-  animation:scroll-left 100s linear infinite;
-  font-family:'Space Mono',monospace;
-  font-size:9px;
-  letter-spacing:.04em;
-}
+.btn{cursor:pointer;transition:all .2s;font-family:Space Mono,monospace;border-radius:4px;font-size:9px;letter-spacing:.08em;padding:6px 12px;border:1px solid}
+.btn-gold{background:rgba(245,200,66,.07);border-color:rgba(245,200,66,.2);color:var(--gold)}.btn-gold:hover{background:rgba(245,200,66,.18)}
+.btn-cyan{background:rgba(0,212,255,.07);border-color:rgba(0,212,255,.2);color:var(--cyan)}.btn-cyan:hover{background:rgba(0,212,255,.18)}
+.btn-panel{background:var(--panel2);border-color:var(--border);color:var(--dim);width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:15px}.btn-panel:hover{border-color:var(--gold);color:var(--gold)}
+.btn-primary{background:var(--gold);border:none;border-radius:5px;padding:10px 22px;font-size:10px;font-family:Space Mono,monospace;font-weight:700;color:var(--navy);cursor:pointer}
+.btn-sec{background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:10px 18px;font-size:10px;font-family:Space Mono,monospace;color:var(--dim);cursor:pointer}
+#clock{font-family:Space Mono,monospace;font-size:10px;color:var(--dim);letter-spacing:.05em}
+.ticker{background:rgba(245,200,66,.04);border-bottom:1px solid rgba(245,200,66,.1);height:30px;overflow:hidden;display:flex;align-items:center}
+.t-track{display:flex;white-space:nowrap;animation:scroll-left 120s linear infinite;font-family:Space Mono,monospace;font-size:9px;letter-spacing:.04em}
 @keyframes scroll-left{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.t-item{display:inline-flex;align-items:center;gap:6px;margin-right:48px}
-.t-lbl{color:var(--gold);font-weight:700}
-.t-val{color:var(--text)}
-.t-up{color:var(--green)}
-.t-dn{color:var(--red)}
-.t-sep{color:var(--muted);margin-right:48px}
+.ti{display:inline-flex;align-items:center;gap:6px;margin-right:48px}
+.tl{color:var(--gold);font-weight:700}.tv{color:var(--text)}.tup{color:var(--green)}.tsep{color:var(--muted);margin-right:48px}
 .page{max-width:1700px;margin:0 auto;padding:22px 22px 60px}
-.ais-banner,.alert-bar,.warn-bar{
-  border-radius:7px;
-  padding:12px 18px;
-  margin-bottom:16px;
-  line-height:1.7;
-}
-.ais-banner{
-  background:rgba(0,212,255,.04);
-  border:1px solid rgba(0,212,255,.15);
-  font-family:'DM Mono',monospace;
-  font-size:11px;
-  color:var(--dim);
-  display:flex;
-  gap:12px;
-}
-.ais-banner strong{color:var(--cyan)}
-.alert-bar{
-  background:rgba(0,230,118,.03);
-  border:1px solid rgba(0,230,118,.12);
-  font-family:'DM Mono',monospace;
-  font-size:11px;
-  color:var(--dim);
-  display:flex;
-  gap:12px;
-}
-.alert-bar strong{color:var(--green)}
-.warn-bar{
-  background:rgba(255,59,59,.03);
-  border:1px solid rgba(255,59,59,.15);
-  font-family:'Space Mono',monospace;
-  font-size:9px;
-  color:rgba(255,59,59,.75);
-}
+.ibar{border-radius:7px;padding:12px 18px;margin-bottom:12px;line-height:1.7;display:flex;gap:12px;font-family:DM Mono,monospace;font-size:11px}
+.ibar-c{background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.15);color:var(--dim)}.ibar-c strong{color:var(--cyan)}
+.ibar-g{background:rgba(0,230,118,.03);border:1px solid rgba(0,230,118,.12);color:var(--dim)}.ibar-g strong{color:var(--green)}
+.ibar-w{background:rgba(255,59,59,.03);border:1px solid rgba(255,59,59,.15);font-family:Space Mono,monospace;font-size:9px;color:rgba(255,59,59,.75)}
 .kpi-row{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:20px}
-.kpi{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:7px;
-  padding:15px 14px;
-  position:relative;
-  overflow:hidden;
-}
-.kpi::after{
-  content:"";
-  position:absolute;
-  top:0;left:0;right:0;height:2px;
-  background:var(--k-color,var(--gold));
-}
-.k-green{--k-color:var(--green)}
-.k-red{--k-color:var(--red)}
-.k-blue{--k-color:var(--blue)}
-.k-amber{--k-color:var(--amber)}
-.k-cyan{--k-color:var(--cyan)}
-.kpi .lbl{
-  font-size:8px;
-  letter-spacing:.15em;
-  color:var(--muted);
-  font-family:'Space Mono',monospace;
-  text-transform:uppercase;
-  margin-bottom:8px
-}
-.kpi .val{font-size:24px;font-weight:800;line-height:1;margin-bottom:5px}
-.kpi .sub{font-size:9px;color:var(--dim);font-family:'Space Mono',monospace}
+.kpi{background:var(--panel);border:1px solid var(--border);border-radius:7px;padding:15px 14px;position:relative;overflow:hidden}
+.kpi::after{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--kc,var(--gold))}
+.kpi .lbl{font-size:8px;letter-spacing:.15em;color:var(--muted);font-family:Space Mono,monospace;text-transform:uppercase;margin-bottom:8px}
+.kpi .val{font-size:22px;font-weight:800;line-height:1;margin-bottom:5px}
+.kpi .sub{font-size:9px;color:var(--dim);font-family:Space Mono,monospace}
 .tab-bar{display:flex;gap:3px;margin-bottom:18px;border-bottom:1px solid var(--border)}
-.tab{
-  background:none;border:none;border-bottom:2px solid transparent;padding:9px 16px;
-  font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);cursor:pointer;
-  letter-spacing:.06em;margin-bottom:-1px;
-}
-.tab:hover{color:var(--dim)}
-.tab.on{color:var(--gold);border-bottom-color:var(--gold)}
-.tp{display:none}
-.tp.on{display:block}
-.s-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px;flex-wrap:wrap}
-.s-title{
-  display:flex;align-items:center;gap:9px;font-size:9px;font-weight:700;letter-spacing:.2em;
-  color:var(--gold);text-transform:uppercase;font-family:'Space Mono',monospace;
-}
+.tab{background:none;border:none;border-bottom:2px solid transparent;padding:9px 16px;font-size:10px;font-family:Space Mono,monospace;color:var(--muted);cursor:pointer;letter-spacing:.06em;margin-bottom:-1px;transition:color .2s}
+.tab:hover{color:var(--dim)}.tab.on{color:var(--gold);border-bottom-color:var(--gold)}
+.tp{display:none}.tp.on{display:block}
+.s-title{display:flex;align-items:center;gap:9px;font-size:9px;font-weight:700;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;font-family:Space Mono,monospace;margin-bottom:14px}
 .s-title::before{content:"";width:2px;height:14px;background:var(--gold);border-radius:2px}
 .filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.fbtn{
-  background:var(--panel);border:1px solid var(--border);border-radius:5px;
-  padding:7px 14px;font-size:9px;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:.05em;
-}
-.fbtn:hover{border-color:var(--border2);color:var(--dim)}
-.fbtn.fa{background:rgba(245,200,66,.07);border-color:var(--gold);color:var(--gold)}
+.fbtn{background:var(--panel);border:1px solid var(--border);border-radius:5px;padding:7px 14px;font-size:9px;font-family:Space Mono,monospace;color:var(--muted);cursor:pointer;letter-spacing:.05em;transition:all .2s}
+.fbtn:hover,.fbtn.fa{background:rgba(245,200,66,.07);border-color:var(--gold);color:var(--gold)}
 .fbtn.fg{background:rgba(0,230,118,.07);border-color:var(--green);color:var(--green)}
-.search{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:5px;
-  padding:7px 13px;
-  font-size:9px;
-  font-family:'Space Mono',monospace;
-  color:var(--text);
-  outline:none;
-  width:220px;
-}
-.tbl-wrap{background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:20px}
-table{width:100%;border-collapse:collapse;font-size:11.5px}
-thead th{
-  background:var(--navy);
-  padding:11px 13px;
-  text-align:left;
-  font-size:8px;
-  font-family:'Space Mono',monospace;
-  letter-spacing:.14em;
-  text-transform:uppercase;
-  color:var(--muted);
-  border-bottom:1px solid var(--border);
-  white-space:nowrap;
-  cursor:pointer;
-  user-select:none;
-}
+.search{background:var(--panel);border:1px solid var(--border);border-radius:5px;padding:7px 13px;font-size:9px;font-family:Space Mono,monospace;color:var(--text);outline:none;width:220px}
+.tbl-wrap{background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:20px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px;min-width:900px}
+thead th{background:var(--navy);padding:11px 13px;text-align:left;font-size:8px;font-family:Space Mono,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
 thead th:hover{color:var(--gold)}
 tbody tr{border-bottom:1px solid rgba(24,44,72,.5);transition:background .15s}
-tbody tr:hover{background:rgba(255,255,255,.018)}
-tbody td{padding:12px 13px;vertical-align:middle}
+tbody tr:hover{background:rgba(255,255,255,.02)}
+tbody td{padding:11px 13px;vertical-align:middle}
 tbody tr.eligible{border-left:3px solid var(--green)}
 tbody tr.blocked{border-left:3px solid var(--red);opacity:.55}
 tbody tr.validate{border-left:3px solid var(--blue)}
 tbody tr.monitor{border-left:3px solid var(--amber)}
-tbody tr.live-row{box-shadow:inset 3px 0 0 var(--cyan)}
-.vname{font-weight:700;color:var(--text);font-size:12px;display:block;margin-bottom:1px}
-.vimo,.csz,.opp-score-lbl,.opp-comm-lbl,.comm-stat-lbl{font-family:'Space Mono',monospace}
-.vimo{font-size:8px;color:var(--muted)}
-.cop{font-size:10.5px;font-weight:600;color:var(--dim)}
-.csz{font-size:8px;color:var(--muted);margin-top:2px}
-.scr-wrap{display:flex;align-items:center;gap:7px}
-.scr-n{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;min-width:28px}
-.scr-n.hi{color:var(--green)}
-.scr-n.mid{color:var(--gold)}
-.scr-n.lo{color:var(--red)}
-.scr-bg{width:54px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
-.scr-fill{height:100%;border-radius:2px}
-.scr-fill.hi{background:var(--green)}
-.scr-fill.mid{background:var(--gold)}
-.scr-fill.lo{background:var(--red)}
-.pill{
-  display:inline-block;
-  padding:3px 9px;
-  border-radius:3px;
-  font-size:8px;
-  font-family:'Space Mono',monospace;
-  font-weight:700;
-  letter-spacing:.06em;
-  white-space:nowrap
-}
+.pill{display:inline-block;padding:3px 9px;border-radius:3px;font-size:8px;font-family:Space Mono,monospace;font-weight:700;letter-spacing:.06em;white-space:nowrap}
 .p-ok{background:rgba(0,230,118,.1);color:var(--green);border:1px solid rgba(0,230,118,.2)}
 .p-no{background:rgba(255,59,59,.1);color:var(--red);border:1px solid rgba(255,59,59,.2)}
 .p-chk{background:rgba(74,158,255,.1);color:var(--blue);border:1px solid rgba(74,158,255,.2)}
 .p-mon{background:rgba(255,149,0,.1);color:var(--amber);border:1px solid rgba(255,149,0,.2)}
-.p-live{background:rgba(0,212,255,.1);color:var(--cyan);border:1px solid rgba(0,212,255,.2)}
-.fuel{
-  display:inline-block;
-  padding:2px 7px;
-  border-radius:3px;
-  font-size:8px;
-  font-family:'Space Mono',monospace;
-  font-weight:700
-}
-.f-vlsfo{background:rgba(0,212,255,.08);color:var(--cyan);border:1px solid rgba(0,212,255,.15)}
-.f-hsfo{background:rgba(255,107,53,.1);color:var(--orange);border:1px solid rgba(255,107,53,.2)}
-.f-mgo{background:rgba(74,158,255,.08);color:var(--blue);border:1px solid rgba(74,158,255,.15)}
-.f-lng{background:rgba(0,230,118,.08);color:var(--green);border:1px solid rgba(0,230,118,.15)}
-.chip{
-  display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:3px;
-  font-size:7.5px;font-family:'Space Mono',monospace;white-space:nowrap;margin:1px
-}
-.chip-new{background:rgba(0,230,118,.06);color:var(--green);border:1px solid rgba(0,230,118,.15)}
-.chip-reroute{background:rgba(255,149,0,.06);color:var(--amber);border:1px solid rgba(255,149,0,.15)}
-.chip-live{background:rgba(0,212,255,.06);color:var(--cyan);border:1px solid rgba(0,212,255,.15)}
-.comm-val{font-family:'Space Mono',monospace;font-size:11px;color:var(--gold);font-weight:700}
-.reason{font-size:9px;color:var(--dim);font-family:'DM Mono',monospace;max-width:220px;line-height:1.55}
-.reason.blocked{color:rgba(255,59,59,.65)}
+.fuel{display:inline-block;padding:2px 7px;border-radius:3px;font-size:8px;font-family:Space Mono,monospace;font-weight:700}
+.f-v{background:rgba(0,212,255,.08);color:var(--cyan);border:1px solid rgba(0,212,255,.15)}
+.f-h{background:rgba(255,107,53,.1);color:var(--orange);border:1px solid rgba(255,107,53,.2)}
+.f-m{background:rgba(74,158,255,.08);color:var(--blue);border:1px solid rgba(74,158,255,.15)}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:3px;font-size:7.5px;font-family:Space Mono,monospace;margin:1px}
+.chip-n{background:rgba(0,230,118,.06);color:var(--green);border:1px solid rgba(0,230,118,.15)}
+.chip-r{background:rgba(255,149,0,.06);color:var(--amber);border:1px solid rgba(255,149,0,.15)}
+.scr-wrap{display:flex;align-items:center;gap:7px}
+.scr-n{font-family:Space Mono,monospace;font-size:13px;font-weight:700;min-width:28px}
+.scr-n.hi{color:var(--green)}.scr-n.mid{color:var(--gold)}.scr-n.lo{color:var(--red)}
+.scr-bg{width:54px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.scr-fill{height:100%;border-radius:2px}
+.scr-fill.hi{background:var(--green)}.scr-fill.mid{background:var(--gold)}.scr-fill.lo{background:var(--red)}
 .opp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
-.opp-card{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:9px;
-  padding:20px;
-  position:relative;
-  overflow:hidden;
-}
-.opp-card::before{
-  content:"";
-  position:absolute;
-  top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,var(--green),var(--cyan))
-}
-.opp-rank{
-  position:absolute;top:14px;right:14px;width:26px;height:26px;border-radius:50%;
-  background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.2);display:flex;align-items:center;justify-content:center;
-  font-size:11px;font-weight:800;color:var(--green);font-family:'Space Mono',monospace
-}
+.opp-card{background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:20px;position:relative;overflow:hidden}
+.opp-card::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--green),var(--cyan))}
+.opp-rank{position:absolute;top:14px;right:14px;width:26px;height:26px;border-radius:50%;background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--green);font-family:Space Mono,monospace}
 .opp-score{font-size:44px;font-weight:800;color:var(--green);line-height:1;margin-bottom:3px}
-.opp-score-lbl{font-size:8px;color:var(--muted);letter-spacing:.12em;margin-bottom:11px}
+.opp-slbl{font-size:8px;color:var(--muted);letter-spacing:.12em;margin-bottom:11px;font-family:Space Mono,monospace}
 .opp-vessel{font-size:14px;font-weight:700;margin-bottom:3px}
 .opp-co{font-size:10px;color:var(--dim);margin-bottom:12px}
 .opp-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:11px}
-.opp-chip{background:var(--panel2);border:1px solid var(--border);border-radius:3px;padding:3px 9px;font-size:9px;font-family:'Space Mono',monospace;color:var(--dim)}
+.opp-chip{background:var(--panel2);border:1px solid var(--border);border-radius:3px;padding:3px 9px;font-size:9px;font-family:Space Mono,monospace;color:var(--dim)}
 .opp-chip span{color:var(--text)}
-.opp-comm{
-  background:rgba(245,200,66,.05);
-  border:1px solid rgba(245,200,66,.12);
-  border-radius:5px;
-  padding:9px 12px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center
-}
-.opp-comm-val{font-size:15px;font-weight:800;color:var(--gold);font-family:'Space Mono',monospace}
-.opp-why{margin-top:9px;font-size:9px;color:var(--dim);font-family:'DM Mono',monospace;line-height:1.6;border-top:1px solid var(--border);padding-top:9px}
-.opp-why strong{color:var(--green)}
+.opp-comm{background:rgba(245,200,66,.05);border:1px solid rgba(245,200,66,.12);border-radius:5px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.opp-comm-val{font-size:15px;font-weight:800;color:var(--gold);font-family:Space Mono,monospace}
+.opp-why{font-size:9px;color:var(--dim);font-family:DM Mono,monospace;line-height:1.6;border-top:1px solid var(--border);padding-top:9px}
 .excl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .excl-cat{background:rgba(255,59,59,.03);border:1px solid rgba(255,59,59,.12);border-radius:7px;padding:15px}
-.excl-cat-title{font-size:9px;font-family:'Space Mono',monospace;letter-spacing:.1em;color:var(--red);margin-bottom:9px}
+.excl-cat-title{font-size:9px;font-family:Space Mono,monospace;letter-spacing:.1em;color:var(--red);margin-bottom:9px;font-weight:700}
 .excl-tags{display:flex;flex-wrap:wrap;gap:4px}
-.excl-tag{
-  background:rgba(255,59,59,.06);
-  border:1px solid rgba(255,59,59,.12);
-  border-radius:3px;
-  padding:2px 7px;
-  font-size:8px;
-  font-family:'Space Mono',monospace;
-  color:rgba(255,59,59,.7)
-}
+.excl-tag{background:rgba(255,59,59,.06);border:1px solid rgba(255,59,59,.12);border-radius:3px;padding:2px 7px;font-size:8px;font-family:Space Mono,monospace;color:rgba(255,59,59,.7)}
 .comm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
 .comm-stat{text-align:center;padding:14px;background:var(--navy);border-radius:7px;border:1px solid var(--border)}
-.comm-stat-val{font-size:26px;font-weight:800;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:3px}
-.modal-bg{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.75);
-  z-index:1000;
-  align-items:center;
-  justify-content:center;
-  backdrop-filter:blur(4px)
-}
+.comm-stat-val{font-size:26px;font-weight:800;color:var(--gold);font-family:Space Mono,monospace;margin-bottom:3px}
+.comm-stat-lbl{font-size:8px;color:var(--muted);font-family:Space Mono,monospace;letter-spacing:.1em}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:2000;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
 .modal-bg.open{display:flex}
-.modal{
-  background:var(--panel);
-  border:1px solid var(--border2);
-  border-radius:10px;
-  padding:28px;
-  width:520px;
-  max-width:95vw
-}
+.modal{background:var(--panel);border:1px solid var(--border2);border-radius:10px;padding:28px;width:520px;max-width:95vw}
 .modal-title{font-size:13px;font-weight:700;color:var(--gold);margin-bottom:6px}
-.modal-sub{font-size:10px;color:var(--dim);font-family:'DM Mono',monospace;margin-bottom:20px;line-height:1.6}
+.modal-sub{font-size:10px;color:var(--dim);font-family:DM Mono,monospace;margin-bottom:20px;line-height:1.6}
 .field-group{margin-bottom:16px}
-.field-lbl{font-size:9px;font-family:'Space Mono',monospace;color:var(--dim);letter-spacing:.1em;margin-bottom:7px;display:block}
-.field-inp{
-  width:100%;
-  background:var(--panel2);
-  border:1px solid var(--border);
-  border-radius:5px;
-  padding:10px 13px;
-  font-size:11px;
-  font-family:'Space Mono',monospace;
-  color:var(--text);
-  outline:none
-}
+.field-lbl{font-size:9px;font-family:Space Mono,monospace;color:var(--dim);letter-spacing:.1em;margin-bottom:7px;display:block}
+.field-inp{width:100%;background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:10px 13px;font-size:11px;font-family:Space Mono,monospace;color:var(--text);outline:none}
 .modal-btns{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
-.btn-primary{
-  background:var(--gold);
-  border:none;
-  border-radius:5px;
-  padding:10px 22px;
-  font-size:10px;
-  font-family:'Space Mono',monospace;
-  font-weight:700;
-  color:var(--navy)
-}
-.btn-secondary{
-  background:var(--panel2);
-  border:1px solid var(--border);
-  border-radius:5px;
-  padding:10px 18px;
-  font-size:10px;
-  font-family:'Space Mono',monospace;
-  color:var(--dim)
-}
-.loading{
-  display:none;
-  position:fixed;
-  bottom:24px;
-  right:24px;
-  z-index:900;
-  background:var(--panel);
-  border:1px solid var(--border2);
-  border-radius:7px;
-  padding:12px 18px;
-  font-size:10px;
-  font-family:'Space Mono',monospace;
-  color:var(--cyan);
-  align-items:center;
-  gap:10px
-}
-.loading.hidden{display:none!important}
-.spin{
-  width:14px;height:14px;border:2px solid rgba(0,212,255,.2);
-  border-top-color:var(--cyan);
-  border-radius:50%;
-  animation:spin .8s linear infinite
-}
+.loading{display:none;position:fixed;bottom:24px;right:24px;z-index:900;background:var(--panel);border:1px solid var(--border2);border-radius:7px;padding:12px 18px;font-size:10px;font-family:Space Mono,monospace;color:var(--cyan);align-items:center;gap:10px}
+.loading.show{display:flex}
+.spin{width:14px;height:14px;border:2px solid rgba(0,212,255,.2);border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.fade-in{animation:fade-up .45s ease both}
-@keyframes fade-up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:1300px){.kpi-row{grid-template-columns:repeat(4,1fr)}}
-@media(max-width:900px){
-  .kpi-row{grid-template-columns:repeat(2,1fr)}
-  .opp-grid,.excl-grid{grid-template-columns:1fr}
-  .comm-stats{grid-template-columns:repeat(2,1fr)}
-  .hdr{height:auto;padding:10px 14px}
-}
+@media(max-width:900px){.kpi-row{grid-template-columns:repeat(2,1fr)}.opp-grid,.excl-grid{grid-template-columns:1fr}.comm-stats{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
 
 <header class="hdr">
   <div class="hdr-brand">
-    <img src="assets/ACO_STAR_LOGO_NETLIFY.png" alt="ACO Energies" class="brand-logo">
-    <div class="brand-col">
+    <div class="logo-pill"><img src="data:image/jpeg;base64,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" alt="ACO Energies"></div>
+    <div style="display:flex;flex-direction:column;gap:2px;margin-left:10px">
       <span class="brand-name">ACO ENERGIES</span>
-      <span class="brand-sub">DEAL ORIGINATION v3 · LIVE AIS + MINERVA SMART FILTER</span>
+      <span class="brand-sub">DEAL ORIGINATION v4 &middot; LIVE AIS + MINERVA SMART FILTER</span>
     </div>
   </div>
-  <div class="hdr-right">
-    <div class="refresh-info">NEXT REFRESH <span id="countdown" style="color:var(--gold)">60s</span></div>
-    <div id="apiStatus" class="api-status demo" onclick="openSettings()" title="Click to configure connection">
-      <span class="status-dot"></span>
-      <span id="apiStatusText">DEMO MODE</span>
-    </div>
-    <button class="refresh-btn" onclick="fetchVessels()">↻ REFRESH NOW</button>
-    <button class="refresh-btn" onclick="exportDashboardPDF()" style="background:rgba(0,212,255,.07);border-color:rgba(0,212,255,.2);color:var(--cyan)">⤓ PDF</button>
-    <button class="settings-btn" onclick="openSettings()" title="Settings">⚙</button>
-    <span id="clock">--:-- UTC</span>
+  <div class="hdr-r">
+    <div style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted)">NEXT REFRESH <span id="cd" style="color:var(--gold)">60s</span></div>
+    <div id="apiStatus" class="status-badge demo" onclick="openSettings()"><span class="dot"></span><span id="apiTxt">DEMO MODE</span></div>
+    <button class="btn btn-gold" onclick="doRefresh()">&#8635; REFRESH NOW</button>
+    <button class="btn btn-cyan" onclick="doPDF()">&#8615; PDF</button>
+    <button class="btn btn-panel" onclick="openSettings()">&#9881;</button>
+    <span id="clock">--:--:-- UTC</span>
   </div>
 </header>
 
-<div class="ticker">
-  <div class="ticker-track">
-    <span class="t-item"><span class="t-lbl">BRENT</span><span class="t-val" id="tk-brent">$103.14/bbl</span><span class="t-up">▲+2.7%</span></span><span class="t-sep">◆</span>
-    <span class="t-item"><span class="t-lbl">PORT SAID VLSFO</span><span class="t-val">$940/mt</span><span class="t-up">★ BEST PRICE</span></span><span class="t-sep">◆</span>
-    <span class="t-item"><span class="t-lbl">MINERVA FILTER</span><span class="t-val">ACTIVE</span><span class="t-up" id="tk-excl">108 NAMES EXCLUDED</span></span><span class="t-sep">◆</span>
-    <span class="t-item"><span class="t-lbl">ELIGIBLE STEMS</span><span class="t-val" id="tk-elig">5</span><span class="t-up">↑ OLD DASHBOARD HAD 2</span></span><span class="t-sep">◆</span>
-    <span class="t-item"><span class="t-lbl">AIS FEED</span><span class="t-val" id="tk-ais">DEMO MODE</span><span class="t-up">SET KEY FOR LIVE</span></span><span class="t-sep">◆</span>
-    <span class="t-item"><span class="t-lbl">COMMISSION TARGET</span><span class="t-val">$2/MT × ELIGIBLE VOLUME</span><span class="t-up">★ ACO ENERGIES</span></span><span class="t-sep">◆</span>
-    <span class="t-item"><span class="t-lbl">EU-ETS SAVING</span><span class="t-val">$319/mt</span><span class="t-up">EGYPT OUTSIDE EEA</span></span><span class="t-sep">◆</span>
-    <span class="t-item"><span class="t-lbl">BRENT</span><span class="t-val">$103.14/bbl</span><span class="t-up">▲+2.7%</span></span><span class="t-sep">◆</span>
-    <span class="t-item"><span class="t-lbl">PORT SAID VLSFO</span><span class="t-val">$940/mt</span><span class="t-up">★ BEST PRICE</span></span><span class="t-sep">◆</span>
-    <span class="t-item"><span class="t-lbl">ELIGIBLE STEMS</span><span class="t-val" id="tk-elig2">5</span><span class="t-up">↑ OLD DASHBOARD HAD 2</span></span><span class="t-sep">◆</span>
-  </div>
-</div>
+<div class="ticker"><div class="t-track">
+  <span class="ti"><span class="tl">BRENT</span><span class="tv" id="tk-brent">$103.14/bbl</span><span class="tup">&#9650;+2.7%</span></span><span class="tsep">&#9670;</span>
+  <span class="ti"><span class="tl">PORT SAID VLSFO</span><span class="tv">$940/mt</span><span class="tup">&#9733; BEST PRICE</span></span><span class="tsep">&#9670;</span>
+  <span class="ti"><span class="tl">MINERVA FILTER</span><span class="tv">ACTIVE</span><span class="tup" id="tk-excl">108 NAMES EXCLUDED</span></span><span class="tsep">&#9670;</span>
+  <span class="ti"><span class="tl">ELIGIBLE STEMS</span><span class="tv" id="tk-elig">-</span><span class="tup">SCORE &ge;65 &middot; UNKNOWN TO MINERVA</span></span><span class="tsep">&#9670;</span>
+  <span class="ti"><span class="tl">AIS FEED</span><span class="tv" id="tk-ais">DEMO MODE</span><span class="tup">SET KEY FOR LIVE</span></span><span class="tsep">&#9670;</span>
+  <span class="ti"><span class="tl">COMMISSION</span><span class="tv">$2/MT &times; ELIGIBLE VOLUME</span><span class="tup">&#9733; ACO ENERGIES</span></span><span class="tsep">&#9670;</span>
+  <span class="ti"><span class="tl">EU-ETS SAVING</span><span class="tv">$319/mt</span><span class="tup">EGYPT OUTSIDE EEA</span></span><span class="tsep">&#9670;</span>
+  <span class="ti"><span class="tl">CAPE ARBITRAGE</span><span class="tv">$540/mt</span><span class="tup">PORT SAID vs CAPE TOWN</span></span><span class="tsep">&#9670;</span>
+  <span class="ti"><span class="tl">HORMUZ</span><span class="tv">DAY 15</span><span class="tup">MINES THREATENED</span></span><span class="tsep">&#9670;</span>
+  <span class="ti"><span class="tl">BRENT</span><span class="tv">$103.14/bbl</span><span class="tup">&#9650;+2.7%</span></span><span class="tsep">&#9670;</span>
+  <span class="ti"><span class="tl">PORT SAID VLSFO</span><span class="tv">$940/mt</span><span class="tup">&#9733; BEST PRICE</span></span><span class="tsep">&#9670;</span>
+  <span class="ti"><span class="tl">ELIGIBLE STEMS</span><span class="tv" id="tk-elig2">-</span><span class="tup">SCORE &ge;65</span></span><span class="tsep">&#9670;</span>
+  <span class="ti"><span class="tl">AIS FEED</span><span class="tv" id="tk-ais2">DEMO MODE</span><span class="tup">GO LIVE VIA SETTINGS</span></span><span class="tsep">&#9670;</span>
+</div></div>
 
 <div class="page">
-  <div class="ais-banner fade-in">
-    <span style="font-size:18px;flex-shrink:0">📡</span>
-    <div>
-      <strong>LIVE AIS INTEGRATION READY.</strong>
-      This dashboard connects to your <strong>Netlify serverless proxy</strong> to pull vessel data for Port Said and Suez.
-      In <strong>Demo Mode</strong>, representative vessels are shown. To activate live data, click <strong>⚙ Settings</strong>,
-      confirm the function URL, and make sure the server-side key is configured in Netlify.
-    </div>
-  </div>
-
-  <div class="alert-bar fade-in">
-    <span style="font-size:18px;flex-shrink:0">✅</span>
-    <div>
-      <strong>INVERTED GAP-FINDER SCORING ACTIVE.</strong>
-      High scores mean Minerva likely does <strong>not</strong> already know the operator. COSCO, MSC, CMA CGM, Maersk and other major direct names are blocked automatically.
-    </div>
-  </div>
+  <div class="ibar ibar-c"><span style="font-size:18px;flex-shrink:0">&#128225;</span><div><strong>LIVE AIS INTEGRATION READY.</strong> Connects to Netlify serverless proxy at <strong>/.netlify/functions/vessel-proxy</strong>. In Demo Mode, representative vessels are shown. Click <strong>&#9881; Settings</strong> and confirm the function URL to go live.</div></div>
+  <div class="ibar ibar-g"><span style="font-size:18px;flex-shrink:0">&#9989;</span><div><strong>INVERTED GAP-FINDER SCORING ACTIVE.</strong> High scores = Minerva likely does <strong>NOT</strong> know the operator. 108 direct client names are blocked. Only <strong>GREEN rows</strong> should be sent to Minerva.</div></div>
 
   <div class="kpi-row">
-    <div class="kpi k-green fade-in"><div class="lbl">Eligible Stems</div><div class="val" id="kpi-eligible" style="color:var(--green)">5</div><div class="sub">Score ≥65 · Unknown to Minerva</div></div>
-    <div class="kpi k-red fade-in"><div class="lbl">Blocked (Filter)</div><div class="val" id="kpi-blocked" style="color:var(--red)">1</div><div class="sub">Minerva direct, do not send</div></div>
-    <div class="kpi fade-in"><div class="lbl">Est. Commission MTD</div><div class="val" id="kpi-comm" style="color:var(--gold)">$52K</div><div class="sub">At $2/MT · confirmed stems</div></div>
-    <div class="kpi k-blue fade-in"><div class="lbl">New to Port Said</div><div class="val" id="kpi-new" style="color:var(--blue)">2</div><div class="sub">First-time callers</div></div>
-    <div class="kpi k-amber fade-in"><div class="lbl">Hormuz Reroutes</div><div class="val" id="kpi-reroute" style="color:var(--amber)">3</div><div class="sub">Diverted · unplanned stems</div></div>
-    <div class="kpi k-cyan fade-in"><div class="lbl">AIS Source</div><div class="val" id="kpi-source" style="color:var(--cyan);font-size:14px;margin-top:4px">DEMO</div><div class="sub" id="kpi-updated">Set key for live</div></div>
-    <div class="kpi fade-in"><div class="lbl">Exclusion DB</div><div class="val">108</div><div class="sub">Minerva direct names loaded</div></div>
+    <div class="kpi" style="--kc:var(--green)"><div class="lbl">Eligible Stems</div><div class="val" id="kpi-elig" style="color:var(--green)">-</div><div class="sub">Score &ge;65 &middot; Unknown to Minerva</div></div>
+    <div class="kpi" style="--kc:var(--red)"><div class="lbl">Blocked (Filter)</div><div class="val" id="kpi-blk" style="color:var(--red)">-</div><div class="sub">Minerva direct, do not send</div></div>
+    <div class="kpi"><div class="lbl">Est. Commission MTD</div><div class="val" id="kpi-comm" style="color:var(--gold)">$0</div><div class="sub">At $2/MT &middot; confirmed stems</div></div>
+    <div class="kpi" style="--kc:var(--blue)"><div class="lbl">New to Port Said</div><div class="val" id="kpi-new" style="color:var(--blue)">-</div><div class="sub">First-time callers</div></div>
+    <div class="kpi" style="--kc:var(--amber)"><div class="lbl">Hormuz Reroutes</div><div class="val" id="kpi-reroute" style="color:var(--amber)">-</div><div class="sub">Diverted &middot; unplanned stems</div></div>
+    <div class="kpi" style="--kc:var(--cyan)"><div class="lbl">AIS Source</div><div class="val" id="kpi-src" style="color:var(--cyan);font-size:14px;margin-top:4px">DEMO</div><div class="sub" id="kpi-upd">Click &#9881; to go live</div></div>
+    <div class="kpi"><div class="lbl">Exclusion DB</div><div class="val" id="kpi-excl" style="color:var(--red)">108</div><div class="sub">Minerva direct names loaded</div></div>
   </div>
 
   <div class="tab-bar">
-    <button class="tab on" onclick="switchTab('cockpit',this)">★ Deal Cockpit</button>
-    <button class="tab" onclick="switchTab('opportunities',this)">🎯 Top Opportunities</button>
-    <button class="tab" onclick="switchTab('exclusions',this)">🚫 Exclusion DB</button>
-    <button class="tab" onclick="switchTab('prices',this)">⛽ Fuel Prices</button>
-    <button class="tab" onclick="switchTab('commission',this)">💰 Commission</button>
-    <button class="tab" onclick="switchTab('ais',this)">📡 AIS Setup</button>
+    <button class="tab on" onclick="switchTab('cockpit',this)">&#9733; Deal Cockpit</button>
+    <button class="tab" onclick="switchTab('opportunities',this)">&#127919; Top Opportunities</button>
+    <button class="tab" onclick="switchTab('exclusions',this)">&#128683; Exclusion DB</button>
+    <button class="tab" onclick="switchTab('prices',this)">&#9981; Fuel Prices</button>
+    <button class="tab" onclick="switchTab('commission',this)">&#128176; Commission</button>
+    <button class="tab" onclick="switchTab('ais',this)">&#128225; AIS Setup</button>
   </div>
 
   <div id="tp-cockpit" class="tp on">
-    <div class="warn-bar">⚠ RED ROWS = Minerva already knows these clients. Only send GREEN rows. BLUE rows need validation first.</div>
-    <div class="s-head">
-      <div class="s-title">Full Pipeline — <span id="vessel-count-label">6 Vessels</span></div>
-      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:9px;font-family:'Space Mono',monospace">
-        <span style="color:var(--green)">● Eligible</span>
-        <span style="color:var(--red)">● Blocked</span>
-        <span style="color:var(--blue)">● Validate</span>
-        <span style="color:var(--amber)">● Monitor</span>
-        <span style="color:var(--cyan)">● Live AIS</span>
+    <div class="ibar ibar-w" style="margin-bottom:12px">&#9888; RED ROWS = Minerva already knows these clients. Only send GREEN rows. BLUE rows need validation first.</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+      <div class="s-title">Full Pipeline &mdash; <span id="vcl">Loading...</span></div>
+      <div style="display:flex;gap:12px;font-size:9px;font-family:Space Mono,monospace">
+        <span style="color:var(--green)">&#9679; Eligible</span><span style="color:var(--red)">&#9679; Blocked</span>
+        <span style="color:var(--blue)">&#9679; Validate</span><span style="color:var(--amber)">&#9679; Monitor</span>
       </div>
     </div>
     <div class="filters">
       <button class="fbtn fa" onclick="filterTable('all',this)">All</button>
-      <button class="fbtn" onclick="filterTable('eligible',this)">✅ Eligible</button>
-      <button class="fbtn" onclick="filterTable('blocked',this)">🚫 Blocked</button>
-      <button class="fbtn" onclick="filterTable('validate',this)">🔍 Validate</button>
-      <button class="fbtn" onclick="filterTable('monitor',this)">👁 Monitor</button>
-      <button class="fbtn" onclick="filterTable('live-row',this)" style="border-color:rgba(0,212,255,.3);color:var(--cyan)">📡 Live AIS</button>
-      <input class="search" type="text" placeholder="Search vessel, operator..." oninput="searchTable(this.value)">
+      <button class="fbtn" onclick="filterTable('eligible',this)">&#9989; Eligible</button>
+      <button class="fbtn" onclick="filterTable('blocked',this)">&#128683; Blocked</button>
+      <button class="fbtn" onclick="filterTable('validate',this)">&#128269; Validate</button>
+      <button class="fbtn" onclick="filterTable('monitor',this)">&#128065; Monitor</button>
+      <input class="search" type="text" id="srch" placeholder="Search vessel, operator, IMO..." oninput="searchTable(this.value)">
     </div>
     <div class="tbl-wrap">
       <table id="mainTable">
-        <thead>
-          <tr>
-            <th onclick="sortTable(0)">Vessel ↕</th>
-            <th>Operator</th>
-            <th onclick="sortTable(2)">Port · ETA ↕</th>
-            <th>Fuel · Qty</th>
-            <th onclick="sortTable(4)">Score ↕</th>
-            <th>Minerva Status</th>
-            <th>Eligibility</th>
-            <th onclick="sortTable(7)">Commission ↕</th>
-            <th>Actions</th>
-            <th>Why / Why Not</th>
-          </tr>
-        </thead>
+        <thead><tr>
+          <th onclick="sortTable(0)">Vessel &#8597;</th><th>IMO</th><th>Operator</th>
+          <th onclick="sortTable(3)">Port &middot; ETA &#8597;</th><th>Fuel &middot; Qty</th>
+          <th onclick="sortTable(5)">Score &#8597;</th><th>Minerva Status</th>
+          <th>Eligibility</th><th onclick="sortTable(8)">Commission &#8597;</th>
+          <th>Tags</th><th>Why / Why Not</th>
+        </tr></thead>
         <tbody id="tableBody"></tbody>
       </table>
     </div>
   </div>
 
   <div id="tp-opportunities" class="tp">
-    <div class="s-head"><div class="s-title">🎯 Top 3 Eligible Stems, Send to Minerva NOW</div></div>
+    <div class="s-title">&#127919; Top Eligible Stems &mdash; Send to Minerva NOW</div>
     <div class="opp-grid" id="oppGrid"></div>
   </div>
 
   <div id="tp-exclusions" class="tp">
-    <div class="s-head"><div class="s-title">🚫 Minerva Direct Client Exclusion Database</div></div>
+    <div class="s-title">&#128683; Minerva Direct Client Exclusion Database (108 Names)</div>
     <div class="excl-grid" id="exclGrid"></div>
   </div>
 
   <div id="tp-prices" class="tp">
-    <div class="s-head"><div class="s-title">⛽ Fuel Price Matrix, Port Said vs World</div></div>
+    <div class="s-title">&#9981; Fuel Price Matrix &mdash; Port Said vs World</div>
     <div class="tbl-wrap">
-      <table>
-        <thead><tr><th>Port</th><th>VLSFO 0.5%S</th><th>HSFO 380</th><th>MGO 0.1%</th><th>EU-ETS Cost</th><th>Status</th><th>ACO Advantage</th></tr></thead>
+      <table style="min-width:600px">
+        <thead><tr><th>Port</th><th>VLSFO 0.5%S</th><th>HSFO-380</th><th>MGO 0.1%</th><th>EU-ETS Cost</th><th>Status</th><th>ACO Advantage</th></tr></thead>
         <tbody>
-          <tr><td><strong>★ Port Said</strong></td><td><strong style="color:var(--green)">$940</strong></td><td><strong style="color:var(--green)">$590</strong></td><td>$1,120</td><td><span class="pill p-ok">FREE</span></td><td><span class="pill p-ok">AVAILABLE</span></td><td>ETS-free, strategic Egypt position</td></tr>
-          <tr><td><strong>★ Suez</strong></td><td>$960</td><td>$610</td><td>$1,140</td><td><span class="pill p-ok">FREE</span></td><td><span class="pill p-ok">ACTIVE</span></td><td>Convoy window and Egypt corridor capture</td></tr>
-          <tr><td>Rotterdam</td><td>$1,020</td><td>$680</td><td>$1,180</td><td><span class="pill p-no">+$319/MT</span></td><td><span class="pill p-chk">NORMAL</span></td><td>ETS cost burden</td></tr>
+          <tr><td><strong style="color:var(--gold)">&#9733; Port Said</strong></td><td><strong style="color:var(--green)">$940</strong></td><td><strong style="color:var(--green)">$590</strong></td><td>$1,120</td><td><span class="pill p-ok">FREE</span></td><td><span class="pill p-ok">AVAILABLE</span></td><td>ETS-free &middot; ACO exclusive &middot; zero deviation convoy</td></tr>
+          <tr><td><strong style="color:var(--gold)">&#9733; Suez</strong></td><td>$960</td><td>$610</td><td>$1,140</td><td><span class="pill p-ok">FREE</span></td><td><span class="pill p-ok">ACTIVE</span></td><td>Convoy window &middot; Egypt corridor captive demand</td></tr>
+          <tr><td>Cape Town</td><td><strong style="color:var(--red)">$1,480</strong></td><td>$980</td><td>$1,650</td><td><span class="pill p-ok">FREE</span></td><td><span class="pill p-no">SCARCE</span></td><td>$540/mt MORE than Port Said &mdash; pitch pre-bunker</td></tr>
+          <tr><td>Singapore</td><td>$882</td><td>$714</td><td>$1,100</td><td><span class="pill p-ok">FREE</span></td><td><span class="pill p-mon">12-16d LEAD</span></td><td>Supply constrained &middot; long lead times</td></tr>
+          <tr><td>Fujairah</td><td>$888</td><td>$710</td><td>$1,080</td><td><span class="pill p-ok">FREE</span></td><td><span class="pill p-no">SUSPENDED</span></td><td>Terminal damaged &middot; GPS jamming &middot; avoid</td></tr>
+          <tr><td>Rotterdam</td><td>$1,020</td><td>$680</td><td>$1,180</td><td><span class="pill p-no">+$319/MT</span></td><td><span class="pill p-chk">NORMAL</span></td><td>ETS cost burden &mdash; push clients to Port Said</td></tr>
           <tr><td>Piraeus</td><td>$1,050</td><td>$700</td><td>$1,200</td><td><span class="pill p-no">+$319/MT</span></td><td><span class="pill p-chk">NORMAL</span></td><td>ACO savings vs Greece corridor</td></tr>
+          <tr><td>Malta</td><td>$618</td><td>$490</td><td>$980</td><td><span class="pill p-no">+$319/MT</span></td><td><span class="pill p-chk">NORMAL</span></td><td>ETS applies &mdash; Port Said saves more overall</td></tr>
         </tbody>
       </table>
     </div>
+    <div class="ibar ibar-g" style="margin-top:12px"><span style="font-size:16px;flex-shrink:0">&#128161;</span><div><strong>ACO PITCH:</strong> Pre-bunkering at Port Said instead of Cape Town saves <strong>$540/mt</strong>. On a 20,000 MT stem = <strong>$10.8M saving</strong>. Port Said + Suez outside EEA = <strong>$319/mt EU-ETS avoided</strong> vs Rotterdam/Malta. Combined saving can exceed <strong>$700/mt</strong>.</div></div>
   </div>
 
   <div id="tp-commission" class="tp">
-    <div class="s-head"><div class="s-title">💰 Commission Tracker, ACO × Minerva ($2/MT)</div></div>
+    <div class="s-title">&#128176; Commission Tracker &mdash; ACO &times; Minerva ($2/MT)</div>
     <div class="comm-stats">
-      <div class="comm-stat"><div class="comm-stat-val">$52,400</div><div class="comm-stat-lbl">Earned MTD</div></div>
-      <div class="comm-stat"><div class="comm-stat-val" id="comm-pipeline">$89K</div><div class="comm-stat-lbl">Pipeline Value</div></div>
-      <div class="comm-stat"><div class="comm-stat-val">26,200 MT</div><div class="comm-stat-lbl">Volume Placed</div></div>
+      <div class="comm-stat"><div class="comm-stat-val" id="ce">$0</div><div class="comm-stat-lbl">Earned MTD</div></div>
+      <div class="comm-stat"><div class="comm-stat-val" id="cp">$0</div><div class="comm-stat-lbl">Pipeline Value</div></div>
+      <div class="comm-stat"><div class="comm-stat-val" id="cv">0 MT</div><div class="comm-stat-lbl">Volume Placed</div></div>
       <div class="comm-stat"><div class="comm-stat-val">$2.00/MT</div><div class="comm-stat-lbl">Contract Rate</div></div>
     </div>
     <div class="tbl-wrap">
-      <table>
-        <thead><tr><th>Vessel</th><th>Operator</th><th>Port</th><th>Qty (MT)</th><th>Est. Commission</th><th>Status</th></tr></thead>
+      <table style="min-width:500px">
+        <thead><tr><th>Vessel</th><th>Operator</th><th>Port</th><th>Qty (MT)</th><th>Commission</th><th>Status</th></tr></thead>
         <tbody id="commTable"></tbody>
       </table>
     </div>
   </div>
 
   <div id="tp-ais" class="tp">
-    <div class="s-head"><div class="s-title">📡 Live AIS Integration Setup</div></div>
-    <div class="alert-bar">
-      <span style="font-size:18px;flex-shrink:0">📡</span>
-      <div>
-        <strong>HOW IT WORKS:</strong> This dashboard calls your Netlify serverless function at
-        <code style="color:var(--cyan)">/.netlify/functions/vessel-proxy</code>.
-        Keep the live API key on Netlify server-side only.
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="s-title">&#128225; Live AIS Integration Setup</div>
+    <div class="ibar ibar-c"><span style="font-size:18px;flex-shrink:0">&#128225;</span><div><strong>HOW IT WORKS:</strong> This dashboard calls your Netlify serverless function at <code style="color:var(--cyan)">/.netlify/functions/vessel-proxy</code>. The function calls AISStream.io using your <strong>AISSTREAM_API_KEY</strong> environment variable stored securely on Netlify. Your key never appears in client-side code.</div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
       <div class="excl-cat" style="border-color:rgba(0,212,255,.2);background:rgba(0,212,255,.03)">
-        <div class="excl-cat-title" style="color:var(--cyan)">STEP 1, Netlify Environment Variable</div>
-        <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--dim);line-height:1.8">
-          Add your live key in Netlify as:<br>
-          <strong style="color:var(--gold)">AISSTREAM_API_KEY</strong><br><br>
-          Never expose the key inside client-side HTML or JS.
-        </div>
+        <div class="excl-cat-title" style="color:var(--cyan)">STEP 1 &mdash; Netlify Environment Variable</div>
+        <div style="font-size:10px;font-family:DM Mono,monospace;color:var(--dim);line-height:1.8">In Netlify &rarr; Project Configuration &rarr; Environment Variables &rarr; Add:<br><strong style="color:var(--gold)">Key: AISSTREAM_API_KEY</strong><br><strong style="color:var(--gold)">Value: your_api_key</strong><br><br>Then trigger a redeploy. Never put the key in HTML/JS.</div>
       </div>
       <div class="excl-cat" style="border-color:rgba(0,212,255,.2);background:rgba(0,212,255,.03)">
-        <div class="excl-cat-title" style="color:var(--cyan)">STEP 2, Dashboard Settings</div>
-        <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--dim);line-height:1.8">
-          Open <strong>⚙ Settings</strong>, confirm the function URL, choose refresh interval,
-          then click <strong>Save & Test Connection</strong>.
-        </div>
+        <div class="excl-cat-title" style="color:var(--cyan)">STEP 2 &mdash; Dashboard Settings</div>
+        <div style="font-size:10px;font-family:DM Mono,monospace;color:var(--dim);line-height:1.8">Click <strong style="color:var(--gold)">&#9881; Settings</strong> in the header.<br>Confirm function URL: <strong style="color:var(--cyan)">/.netlify/functions/vessel-proxy</strong><br>Set refresh interval &rarr; Click <strong>Save &amp; Test Connection</strong>.<br><br>If connection succeeds, status changes to <strong style="color:var(--green)">LIVE</strong>.</div>
       </div>
     </div>
-    <div style="margin-top:16px;text-align:center">
-      <button class="btn-primary" onclick="openSettings()">⚙ Open Settings Now</button>
-    </div>
+    <div style="margin-top:16px;text-align:center"><button class="btn-primary" onclick="openSettings()">&#9881; Open Settings Now</button></div>
   </div>
 </div>
 
 <div class="modal-bg" id="settingsModal">
   <div class="modal">
-    <div class="modal-title">⚙ Dashboard Settings, AIS Configuration</div>
-    <div class="modal-sub">Configure your serverless proxy connection. Your live key should stay on Netlify, not in browser code.</div>
-    <div class="field-group">
-      <label class="field-lbl">NETLIFY FUNCTION URL</label>
-      <input class="field-inp" id="s-funcUrl" type="text" value="/.netlify/functions/vessel-proxy">
-    </div>
-    <div class="field-group">
-      <label class="field-lbl">LOCAL REFERENCE KEY, optional</label>
-      <input class="field-inp" id="s-apiKey" type="password" placeholder="Optional local reference only">
-    </div>
-    <div class="field-group">
-      <label class="field-lbl">AUTO-REFRESH INTERVAL</label>
-      <select class="field-inp" id="s-interval">
-        <option value="30">30 seconds</option>
-        <option value="60" selected>60 seconds</option>
-        <option value="120">2 minutes</option>
-        <option value="300">5 minutes</option>
-      </select>
+    <div class="modal-title">&#9881; Dashboard Settings &mdash; AIS Configuration</div>
+    <div class="modal-sub">Configure your Netlify serverless proxy. Your live API key stays on Netlify server-side only.</div>
+    <div class="field-group"><label class="field-lbl">NETLIFY FUNCTION URL</label><input class="field-inp" id="sUrl" type="text" value="/.netlify/functions/vessel-proxy"></div>
+    <div class="field-group"><label class="field-lbl">AUTO-REFRESH INTERVAL</label>
+      <select class="field-inp" id="sInt"><option value="30">30 seconds</option><option value="60" selected>60 seconds</option><option value="120">2 minutes</option><option value="300">5 minutes</option></select>
     </div>
     <div class="modal-btns">
-      <button class="btn-primary" onclick="saveSettings()">Save & Test Connection</button>
-      <button class="btn-secondary" onclick="closeSettings()">Cancel</button>
-      <button class="btn-secondary" onclick="clearApiKey()" style="color:var(--red);border-color:rgba(255,59,59,.3);margin-left:auto">Clear Key</button>
+      <button class="btn-primary" onclick="saveSettings()">Save &amp; Test Connection</button>
+      <button class="btn-sec" onclick="closeSettings()">Cancel</button>
     </div>
-    <div id="s-result" style="margin-top:14px;font-size:9.5px;font-family:'DM Mono',monospace;color:var(--dim);line-height:1.7;display:none"></div>
+    <div id="sResult" style="margin-top:14px;font-size:9.5px;font-family:DM Mono,monospace;color:var(--dim);line-height:1.7;display:none"></div>
   </div>
 </div>
 
-<div class="loading hidden" id="loadingToast">
-  <div class="spin"></div>
-  <span id="loadingText">Fetching live data...</span>
-</div>
+<div class="loading" id="loadingToast"><div class="spin"></div><span>Fetching live data...</span></div>
 
 <script>
-const MINERVA_DIRECT = new Set([
-  'COSCO SHIPPING','COSCO','MSC','MEDITERRANEAN SHIPPING CO','CMA CGM','MAERSK',
-  'EVERGREEN','HAPAG-LLOYD','YANG MING','HMM','ONE','OOCL','PIL','ZIM','WAN HAI',
-  'BP SHIPPING','SHELL TRADING','TOTALENERGIES MARINE','VITOL','TRAFIGURA','GUNVOR',
-  'CARGILL OCEAN','LOUIS DREYFUS','GLENCORE','EQUINOR','CHEVRON SHIPPING','EXXONMOBIL SHIPPING',
-  'TSAKOS GROUP','ANGELICOUSSIS','MARAN TANKERS','CAPITAL SHIP MANAGEMENT','DYNACOM','THENAMARIS',
-  'NEDA MARITIME','COSTAMARE','DIANA SHIPPING','NAVIOS','DANAOS','SCORPIO TANKERS',
-  'EURONAV','FRONTLINE','DHT HOLDINGS','TEEKAY','ARDMORE SHIPPING','INTERNATIONAL SEAWAYS',
-  'MISC BERHAD','PETRONAS SHIPPING','PERTAMINA','ARAMCO TRADING','ADNOC LOGISTICS',
-  'V.SHIPS','COLUMBIA SHIPMANAGEMENT','THOME GROUP','BERNHARD SCHULTE','REEDEREI NSB',
-  'HAMBURG SUD','ARKAS HOLDING','BOGAZICI SHIPPING'
-]);
-  
-const exclusionCategories = [
-    {title: '🏢 Major Liner Operators', names:['COSCO Shipping','MSC','CMA CGM','Maersk','Evergreen','Hapag-Lloyd','Yang Ming','HMM','ONE']},
-    {title: '🛢 Oil Majors & Traders', names:['BP Shipping','Shell Trading','TotalEnergies Marine','Vitol','Trafigura','Gunvor','Cargill Ocean']}
+/* ACO Energies Deal Origination Dashboard v4 - Clean Single Script */
+
+var MINERVA_DIRECT = new Set(['COSCO SHIPPING','COSCO','MSC','MEDITERRANEAN SHIPPING CO','CMA CGM','MAERSK','EVERGREEN','HAPAG-LLOYD','YANG MING','HMM','ONE','OOCL','PIL','ZIM','WAN HAI','BP SHIPPING','SHELL TRADING','TOTALENERGIES MARINE','VITOL','TRAFIGURA','GUNVOR','CARGILL OCEAN','LOUIS DREYFUS','GLENCORE','EQUINOR','CHEVRON SHIPPING','EXXONMOBIL SHIPPING','TSAKOS GROUP','ANGELICOUSSIS','MARAN TANKERS','CAPITAL SHIP MANAGEMENT','DYNACOM','THENAMARIS','NEDA MARITIME','COSTAMARE','DIANA SHIPPING','NAVIOS','DANAOS','SCORPIO TANKERS','EURONAV','FRONTLINE','DHT HOLDINGS','TEEKAY','ARDMORE SHIPPING','INTERNATIONAL SEAWAYS','MISC BERHAD','PETRONAS SHIPPING','PERTAMINA','ARAMCO TRADING','ADNOC LOGISTICS','V.SHIPS','COLUMBIA SHIPMANAGEMENT','THOME GROUP','BERNHARD SCHULTE','REEDEREI NSB','HAMBURG SUD','ARKAS HOLDING','BOGAZICI SHIPPING','STOLT-NIELSEN','ODFJELL','NAVIG8','DORIAN LPG','NAVIGATOR GAS','EXMAR','AVANCE GAS','EPIC GAS','ULTRAGAS','PACIFIC BASIN','STAR BULK','EAGLE BULK','GENCO SHIPPING','GRINDROD','OLDENDORFF','NORDEN','ULTRAMAR','THORESEN','PRECIOUS SHIPPING','MOL','NYK','K-LINE','HEUNG-A','SINOKOR','KMTC','PAN OCEAN','CHINA COSCO','CHINA MERCHANTS','SINOTRANS','CMES','GOLDEN OCEAN','SAFE BULKERS','BUNGE SHIPPING','ADM SHIPPING','CARGILL BULK','TRAFIGURA MARITIME','FREEPOINT COMMODITIES','MERCURIA SHIPPING','PHIBRO','STENA','CARNIVAL','ROYAL CARIBBEAN','NORWEGIAN CRUISE','MSC CRUISES','CRYSTAL CRUISES','REGENT SEVEN SEAS','OCEANIA CRUISES','BAHRI','NATIONAL SHIPPING CO OF SAUDI ARABIA','IRISL','NITC','CHINA OCEAN SHIPPING','CHINA SHIPPING']);
+
+var EXCL_CATS = [
+  {title:'Major Liner Operators',names:['COSCO Shipping','MSC','CMA CGM','Maersk','Evergreen','Hapag-Lloyd','Yang Ming','HMM','ONE','OOCL','PIL','ZIM','Wan Hai']},
+  {title:'Oil Majors & Commodity Traders',names:['BP Shipping','Shell Trading','TotalEnergies Marine','Vitol','Trafigura','Gunvor','Cargill Ocean','Glencore','Equinor','Chevron Shipping','ExxonMobil Shipping','Louis Dreyfus','Phibro','Freepoint']},
+  {title:'Greek Major Tanker Groups',names:['Tsakos Group','Angelicoussis','Maran Tankers','Capital Ship Mgmt','Dynacom','Thenamaris','Neda Maritime','Costamare','Diana Shipping','Navios','Danaos']},
+  {title:'Major Tanker Companies',names:['Scorpio Tankers','Euronav','Frontline','DHT Holdings','Teekay','Ardmore Shipping','Intl Seaways','Stolt-Nielsen','Odfjell','Navig8','Dorian LPG']},
+  {title:'Asian Shipping Groups',names:['MISC Berhad','Petronas Shipping','Pertamina','MOL','NYK','K-Line','Heung-A','Sinokor','KMTC','Pan Ocean','China Merchants','Sinotrans']},
+  {title:'Dry Bulk Major Operators',names:['Pacific Basin','Star Bulk','Eagle Bulk','Genco Shipping','Grindrod','Oldendorff','Norden','Golden Ocean','Safe Bulkers']},
+  {title:'Ship Management Giants',names:['V.Ships','Columbia Shipmanagement','Thome Group','Bernhard Schulte','Reederei NSB']},
+  {title:'Cruise Lines',names:['Carnival','Royal Caribbean','Norwegian Cruise','MSC Cruises','Crystal Cruises','Regent Seven Seas','Oceania Cruises']},
+  {title:'State / National Carriers',names:['BAHRI / NSCSA','IRISL','NITC','China Ocean Shipping','China Shipping']},
 ];
 
-function openSettings() {
-    console.log("Opening settings");
+var DEMO_VESSELS = [
+  {name:'MT NORDIC BREEZE',imo:'9812344',operator:'Nordic Tankers AS',port:'Port Said',eta:'Mar 29 06:00',fuel:'VLSFO',qty:3200,newPort:true,reroute:true,reason:'First Port Said call. Norwegian mid-size tanker operator. NOT in Minerva direct list. High gap-finder score.'},
+  {name:'MV MUMBAI GRACE',imo:'9734521',operator:'Excellent Shipping Co',port:'Port Said',eta:'Mar 29 14:00',fuel:'HSFO-380',qty:1800,newPort:false,reroute:true,reason:'Hormuz reroute. Indian operator. Minerva does not supply Indian mid-tier owners directly.'},
+  {name:'MT ATLAS MERIDIAN',imo:'9621089',operator:'Atlas Maritime LLC',port:'Suez',eta:'Mar 30 08:00',fuel:'VLSFO',qty:2500,newPort:true,reroute:false,reason:'New Suez caller. UAE-based private operator. High gap-finder score. First call.'},
+  {name:'MV GOLDEN TIGER',imo:'9445782',operator:'Tiger Ocean Shipping',port:'Port Said',eta:'Mar 30 12:00',fuel:'VLSFO',qty:4100,newPort:false,reroute:true,reason:'Cape reroute. Southeast Asian bulk operator. Unplanned Port Said call. Unknown to Minerva.'},
+  {name:'MT COSCO VOYAGE',imo:'9567234',operator:'COSCO SHIPPING',port:'Port Said',eta:'Mar 31 09:00',fuel:'VLSFO',qty:6000,newPort:false,reroute:false,reason:'BLOCKED. COSCO is a Minerva direct client. Do NOT send to Minerva.'},
+  {name:'MT BOSPHORUS STAR',imo:'9388901',operator:'Bosphorus Tankers',port:'Port Said',eta:'Mar 31 16:00',fuel:'MGO',qty:800,newPort:false,reroute:false,reason:'Turkish mid-tier operator. Verify relationship before sending. Possible Minerva contact.'},
+  {name:'MV PACIFIC KESTREL',imo:'9712456',operator:'Kestrel Shipping Ltd',port:'Suez',eta:'Apr 01 10:00',fuel:'VLSFO',qty:2800,newPort:true,reroute:true,reason:'Hormuz reroute. First Suez call. Hong Kong registered operator. Unknown to Minerva.'},
+];
 
-    const modal = document.getElementById("settingsModal");
+var vessels = [];
+var currentFilter = 'all';
+var sortCol = -1;
+var sortDir = 1;
+var isLive = false;
+var funcUrl = '/.netlify/functions/vessel-proxy';
+var refreshSecs = 60;
+var cdSecs = 60;
 
-    if (modal) {
-        modal.style.display = "block";
-    }
-}
-
-function closeSettings() {
-    const modal = document.getElementById("settingsModal");
-
-    if (modal) {
-        modal.style.display = "none";
-    }
-}
-
-function fetchVessels() {
-    console.log("Fetching vessels");
-
-    const toast = document.getElementById("loadingToast");
-
-    if (toast) {
-        toast.classList.remove("hidden");
-
-        setTimeout(() => {
-            toast.classList.add("hidden");
-        }, 2000);
-    }
-}
-
-function exportDashboardPDF() {
-    console.log("Exporting PDF");
-    alert("PDF export triggered");
-}
-function openSettings() {
-    const modal = document.getElementById("settingsModal");
-    if (modal) {
-        modal.style.display = "block";
-    } else {
-        alert("Settings panel coming soon.");
-    }
-}
-
-function switchTab(tabName) {
-    console.log("Switching tab:", tabName);
-}
-
-function filterTable() {
-    console.log("Filtering table...");
-}
-<script>
-(function () {
-  function byId(id) {
-    return document.getElementById(id);
+/* SCORING */
+function score(op) {
+  if (!op) return 0;
+  var u = op.toUpperCase();
+  if (MINERVA_DIRECT.has(u)) return 0;
+  for (var d of MINERVA_DIRECT) {
+    if (u.indexOf(d) >= 0 || d.indexOf(u) >= 0) return 10;
   }
+  return 75;
+}
+function eligibility(s) { return s === 0 ? 'blocked' : s < 65 ? 'validate' : 'eligible'; }
 
-  window.openSettings = function () {
-    const modal =
-      byId("settingsModal") ||
-      byId("settingsPanel") ||
-      byId("settingsDrawer");
+/* CLOCK */
+setInterval(function() {
+  var n = new Date();
+  var t = [n.getUTCHours(),n.getUTCMinutes(),n.getUTCSeconds()].map(function(x){return String(x).padStart(2,'0');}).join(':');
+  document.getElementById('clock').textContent = t + ' UTC';
+}, 1000);
 
-    if (modal) {
-      modal.style.display = "block";
-      modal.classList.remove("hidden");
-      modal.classList.add("open");
-      return;
-    }
+/* COUNTDOWN */
+setInterval(function() {
+  cdSecs--;
+  if (cdSecs <= 0) { cdSecs = refreshSecs; doRefresh(); }
+  var m = String(Math.floor(cdSecs/60)).padStart(2,'0');
+  var s = String(cdSecs%60).padStart(2,'0');
+  var el = document.getElementById('cd');
+  if (el) { el.textContent = m+':'+s; el.style.color = cdSecs < 20 ? 'var(--red)' : 'var(--gold)'; }
+}, 1000);
 
-    alert("Settings panel not found in the page.");
-  };
+/* TAB SWITCH */
+function switchTab(name, btn) {
+  document.querySelectorAll('.tp').forEach(function(p){ p.classList.remove('on'); });
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('on'); });
+  var tp = document.getElementById('tp-'+name);
+  if (tp) tp.classList.add('on');
+  if (btn) btn.classList.add('on');
+}
 
-  window.closeSettings = function () {
-    const modal =
-      byId("settingsModal") ||
-      byId("settingsPanel") ||
-      byId("settingsDrawer");
-
-    if (modal) {
-      modal.style.display = "none";
-      modal.classList.add("hidden");
-      modal.classList.remove("open");
-    }
-  };
-
-  window.exportDashboardPDF = function () {
-    alert("PDF export is not wired yet.");
-  };
-
-  window.fetchVessels = async function () {
-    try {
-      const toast = byId("loadingToast");
-      if (toast) toast.classList.remove("hidden");
-
-      const res = await fetch("/.netlify/functions/vessel-proxy");
-      const data = await res.json();
-      console.log("vessel-proxy response:", data);
-
-      const badge =
-        byId("aisSourceBadge") ||
-        byId("aisSource") ||
-        byId("feedMode");
-
-      if (badge && data && data.ok) {
-        badge.textContent = "LIVE";
-      }
-
-      const countEl =
-        byId("vesselCount") ||
-        byId("aisCount") ||
-        byId("liveCount");
-
-      if (countEl && data && typeof data.vessel_count !== "undefined") {
-        countEl.textContent = data.vessel_count;
-      }
-
-      return data;
-    } catch (err) {
-      console.error("fetchVessels failed:", err);
-      alert("Failed to fetch vessels.");
-    } finally {
-      const toast = byId("loadingToast");
-      if (toast) toast.classList.add("hidden");
-    }
-  };
-
-  window.switchTab = function (tabName) {
-    document.querySelectorAll("[data-tab]").forEach((el) => {
-      el.classList.add("hidden");
-    });
-
-    document.querySelectorAll("[data-tab-button]").forEach((el) => {
-      el.classList.remove("active");
-    });
-
-    const target =
-      document.querySelector('[data-tab="' + tabName + '"]') ||
-      byId(tabName);
-
-    if (target) target.classList.remove("hidden");
-
-    const btn =
-      document.querySelector('[data-tab-button="' + tabName + '"]');
-
-    if (btn) btn.classList.add("active");
-
-    console.log("Switched tab:", tabName);
-  };
-
-  window.filterTable = function () {
-    console.log("filterTable called");
-  };
-
-  window.applyFilters = function () {
-    console.log("applyFilters called");
-    if (typeof window.filterTable === "function") {
-      window.filterTable();
-    }
-  };
-
-  document.addEventListener("DOMContentLoaded", function () {
-    console.log("Global UI shim loaded");
+/* PROCESS VESSELS */
+function processVessels(raw) {
+  return raw.map(function(v) {
+    var s = score(v.operator);
+    var e = eligibility(s);
+    return { name:v.name, imo:v.imo, operator:v.operator, port:v.port, eta:v.eta, fuel:v.fuel, qty:v.qty, score:s, eligibility:e, commission:e==='eligible'?v.qty*2:0, newPort:v.newPort||false, reroute:v.reroute||false, reason:v.reason||'' };
   });
-})();
-
-<script>
-/* ===== CORE DASHBOARD FUNCTIONS ===== */
-
-function openSettings() {
-  console.log("Settings opened");
-  alert("Settings button is now working");
 }
 
-function exportDashboardPDF() {
-  console.log("Export PDF triggered");
-  window.print();
+/* UPDATE KPIs */
+function updateKPIs(vd) {
+  var elig = vd.filter(function(v){return v.eligibility==='eligible';});
+  var blk = vd.filter(function(v){return v.eligibility==='blocked';});
+  var tc = vd.reduce(function(a,v){return a+v.commission;},0);
+  var vol = elig.reduce(function(a,v){return a+v.qty;},0);
+  var pip = vd.filter(function(v){return v.eligibility!=='blocked';}).reduce(function(a,v){return a+v.qty*2;},0);
+  
+  document.getElementById('kpi-elig').textContent = elig.length;
+  document.getElementById('kpi-blk').textContent = blk.length;
+  document.getElementById('kpi-new').textContent = vd.filter(function(v){return v.newPort;}).length;
+  document.getElementById('kpi-reroute').textContent = vd.filter(function(v){return v.reroute;}).length;
+  document.getElementById('kpi-comm').textContent = '$'+Math.round(tc/1000)+'K';
+  document.getElementById('tk-elig').textContent = elig.length;
+  document.getElementById('tk-elig2').textContent = elig.length;
+  document.getElementById('vcl').textContent = vd.length + ' Vessels';
+  document.getElementById('ce').textContent = '$'+tc.toLocaleString();
+  document.getElementById('cp').textContent = '$'+Math.round(pip/1000)+'K';
+  document.getElementById('cv').textContent = vol.toLocaleString()+' MT';
 }
 
-function fetchVessels() {
-  console.log("Fetching vessels from proxy...");
+/* RENDER TABLE */
+function renderTable(data) {
+  var tbody = document.getElementById('tableBody');
+  if (!tbody) return;
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--muted);font-family:Space Mono,monospace;font-size:9px">NO VESSELS MATCH FILTER</td></tr>'; return; }
+  tbody.innerHTML = data.map(function(v) {
+    var sc = v.score >= 65 ? 'hi' : v.score >= 30 ? 'mid' : 'lo';
+    var fc = v.fuel==='VLSFO'?'f-v':v.fuel==='HSFO-380'?'f-h':'f-m';
+    var pc = v.eligibility==='eligible'?'p-ok':v.eligibility==='blocked'?'p-no':v.eligibility==='validate'?'p-chk':'p-mon';
+    var pt = v.eligibility==='eligible'?'&#9989; SEND':v.eligibility==='blocked'?'&#128683; BLOCKED':v.eligibility==='validate'?'&#128269; VALIDATE':'&#128065; MONITOR';
+    var tags = (v.newPort?'<span class="chip chip-n">&#9733; NEW</span>':'')+(v.reroute?'<span class="chip chip-r">&#9889; REROUTE</span>':'');
+    var comm = v.commission>0?'<span style="color:var(--gold);font-family:Space Mono,monospace;font-weight:700">$'+v.commission.toLocaleString()+'</span>':'<span style="color:var(--muted)">&#8212;</span>';
+    return '<tr class="'+v.eligibility+'"><td><span style="font-weight:700;font-size:12px">'+v.name+'</span></td><td><span style="font-family:Space Mono,monospace;font-size:8px;color:var(--muted)">'+v.imo+'</span></td><td><span style="font-size:10.5px;font-weight:600">'+v.operator+'</span></td><td><span style="font-size:10px">'+v.port+'</span><br><span style="font-size:8px;color:var(--muted);font-family:Space Mono,monospace">'+v.eta+'</span></td><td><span class="fuel '+fc+'">'+v.fuel+'</span><br><span style="font-size:8px;color:var(--muted);font-family:Space Mono,monospace;display:block;margin-top:3px">'+v.qty.toLocaleString()+' MT</span></td><td><div class="scr-wrap"><span class="scr-n '+sc+'">'+v.score+'</span><div class="scr-bg"><div class="scr-fill '+sc+'" style="width:'+v.score+'%"></div></div></div></td><td>'+(v.eligibility==='blocked'?'<span style="color:var(--red);font-size:9px;font-family:Space Mono,monospace">MINERVA DIRECT</span>':'<span style="color:var(--green);font-size:9px;font-family:Space Mono,monospace">UNKNOWN</span>')+'</td><td><span class="pill '+pc+'">'+pt+'</span></td><td>'+comm+'</td><td>'+tags+'</td><td><span style="font-size:9px;color:'+(v.eligibility==='blocked'?'rgba(255,59,59,.65)':'var(--dim)')+';font-family:DM Mono,monospace;max-width:220px;display:block;line-height:1.55">'+v.reason+'</span></td></tr>';
+  }).join('');
+}
 
-  fetch("/.netlify/functions/vessel-proxy")
-    .then(function(response) {
-      return response.json();
+/* RENDER OPPS */
+function renderOpps(vd) {
+  var g = document.getElementById('oppGrid');
+  if (!g) return;
+  var elig = vd.filter(function(v){return v.eligibility==='eligible';}).sort(function(a,b){return b.score-a.score;}).slice(0,3);
+  if (!elig.length) { g.innerHTML = '<div style="color:var(--muted);font-family:Space Mono,monospace;font-size:9px;padding:20px">No eligible stems. Load vessels or check AIS connection.</div>'; return; }
+  g.innerHTML = elig.map(function(v,i) {
+    var fc = v.fuel==='VLSFO'?'f-v':v.fuel==='HSFO-380'?'f-h':'f-m';
+    var tags = (v.newPort?'<span class="chip chip-n">&#9733; FIRST CALL</span>':'')+(v.reroute?'<span class="chip chip-r">&#9889; HORMUZ REROUTE</span>':'');
+    return '<div class="opp-card"><div class="opp-rank">'+(i+1)+'</div><div class="opp-score">'+v.score+'</div><div class="opp-slbl">GAP-FINDER SCORE &middot; UNKNOWN TO MINERVA</div><div class="opp-vessel">'+v.name+'</div><div class="opp-co">'+v.operator+'</div><div class="opp-chips"><span class="opp-chip">Port <span>'+v.port+'</span></span><span class="opp-chip">ETA <span>'+v.eta+'</span></span><span class="opp-chip"><span class="fuel '+fc+'">'+v.fuel+'</span></span><span class="opp-chip">Qty <span>'+v.qty.toLocaleString()+' MT</span></span>'+tags+'</div><div class="opp-comm"><span class="opp-comm-val">$'+v.commission.toLocaleString()+' ACO FEE</span><span style="font-size:8px;color:var(--dim);font-family:Space Mono,monospace">@$2/MT</span></div><div class="opp-why">'+v.reason+'</div></div>';
+  }).join('');
+}
+
+/* RENDER EXCL */
+function renderExcl() {
+  var g = document.getElementById('exclGrid');
+  if (!g) return;
+  g.innerHTML = EXCL_CATS.map(function(cat) {
+    return '<div class="excl-cat"><div class="excl-cat-title">&#128683; '+cat.title+'</div><div class="excl-tags">'+cat.names.map(function(n){return '<span class="excl-tag">'+n+'</span>';}).join('')+'</div></div>';
+  }).join('');
+}
+
+/* RENDER COMM TABLE */
+function renderComm(vd) {
+  var tb = document.getElementById('commTable');
+  if (!tb) return;
+  var elig = vd.filter(function(v){return v.eligibility==='eligible';});
+  tb.innerHTML = elig.length ? elig.map(function(v){return '<tr><td style="font-weight:700">'+v.name+'</td><td>'+v.operator+'</td><td>'+v.port+'</td><td>'+v.qty.toLocaleString()+'</td><td style="color:var(--gold);font-family:Space Mono,monospace;font-weight:700">$'+v.commission.toLocaleString()+'</td><td><span class="pill p-chk">PIPELINE</span></td></tr>';}).join('') : '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);font-size:9px;font-family:Space Mono,monospace">No eligible vessels</td></tr>';
+}
+
+/* FILTER */
+function filterTable(mode, btn) {
+  currentFilter = mode;
+  document.querySelectorAll('.fbtn').forEach(function(b){b.classList.remove('fa','fg');});
+  if (btn) btn.classList.add(mode==='eligible'?'fg':'fa');
+  applyFS();
+}
+
+function searchTable(v) { applyFS(); }
+
+function applyFS() {
+  var sv = ((document.getElementById('srch')||{}).value||'').toLowerCase();
+  var f = vessels.filter(function(v) {
+    var mf = currentFilter==='all'||v.eligibility===currentFilter;
+    var ms = !sv||v.name.toLowerCase().indexOf(sv)>=0||v.operator.toLowerCase().indexOf(sv)>=0||v.imo.indexOf(sv)>=0;
+    return mf&&ms;
+  });
+  renderTable(f);
+}
+
+/* SORT */
+function sortTable(col) {
+  if (sortCol===col) sortDir*=-1; else {sortCol=col;sortDir=1;}
+  var keys=['name','imo','operator','eta','fuel','score','eligibility','eligibility','commission'];
+  var key=keys[col]||'score';
+  vessels.sort(function(a,b){return a[key]<b[key]?-sortDir:a[key]>b[key]?sortDir:0;});
+  applyFS();
+}
+
+/* LOAD */
+function loadVessels(data) {
+  vessels = processVessels(data);
+  updateKPIs(vessels);
+  applyFS();
+  renderOpps(vessels);
+  renderComm(vessels);
+}
+
+/* REFRESH */
+function doRefresh() {
+  var toast = document.getElementById('loadingToast');
+  if (toast) toast.classList.add('show');
+  cdSecs = refreshSecs;
+  if (isLive) {
+    fetch(funcUrl)
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if (d&&d.vessels&&d.vessels.length) {
+          loadVessels(d.vessels);
+          document.getElementById('kpi-src').textContent='LIVE';
+          document.getElementById('kpi-upd').textContent='Updated '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+' UTC';
+          document.getElementById('tk-ais').textContent='LIVE';
+          document.getElementById('tk-ais2').textContent='LIVE';
+          setMode(true);
+        } else { loadVessels(DEMO_VESSELS); }
+      })
+      .catch(function(){loadVessels(DEMO_VESSELS);setMode(false);})
+      .finally(function(){if(toast)toast.classList.remove('show');});
+  } else {
+    setTimeout(function(){loadVessels(DEMO_VESSELS);if(toast)toast.classList.remove('show');},400);
+  }
+}
+
+function setMode(live) {
+  isLive=live;
+  var el=document.getElementById('apiStatus');
+  var txt=document.getElementById('apiTxt');
+  el.className='status-badge '+(live?'live':'demo');
+  txt.textContent=live?'LIVE AIS':'DEMO MODE';
+}
+
+/* SETTINGS */
+function openSettings(){document.getElementById('settingsModal').classList.add('open');}
+function closeSettings(){document.getElementById('settingsModal').classList.remove('open');}
+
+function saveSettings(){
+  funcUrl=document.getElementById('sUrl').value||'/.netlify/functions/vessel-proxy';
+  refreshSecs=parseInt(document.getElementById('sInt').value)||60;
+  cdSecs=refreshSecs;
+  var r=document.getElementById('sResult');
+  r.style.display='block';r.style.color='var(--cyan)';
+  r.textContent='Testing connection to '+funcUrl+'...';
+  fetch(funcUrl)
+    .then(function(res){return res.json();})
+    .then(function(d){
+      setMode(true);r.style.color='var(--green)';
+      r.textContent='Connection successful! Switched to LIVE mode. Vessels: '+(d.vessel_count||d.vessels&&d.vessels.length||'N/A');
+      doRefresh();setTimeout(closeSettings,2000);
     })
-    .then(function(data) {
-      console.log("Proxy response:", data);
-
-      if (data && data.vessel_count !== undefined) {
-        var el = document.getElementById("vesselCount");
-        if (el) {
-          el.innerText = data.vessel_count;
-        }
-      }
-
-      alert("Refresh is now working");
-    })
-    .catch(function(error) {
-      console.error("Fetch failed:", error);
-      alert("Fetch failed");
+    .catch(function(e){
+      r.style.color='var(--red)';
+      r.textContent='Connection failed: '+e.message+'. Check function URL and ensure AISSTREAM_API_KEY is set in Netlify.';
     });
 }
 
-function refreshNow() {
-  fetchVessels();
+/* PDF */
+function doPDF(){
+  var now=new Date();
+  var elig=vessels.filter(function(v){return v.eligibility==='eligible';});
+  var tc=vessels.reduce(function(a,v){return a+v.commission;},0);
+  var rows=vessels.map(function(v){
+    return '<tr style="background:'+(v.eligibility==='eligible'?'#e8fff4':v.eligibility==='blocked'?'#fff0f0':'#f0f6ff')+'"><td>'+v.name+'</td><td>'+v.imo+'</td><td>'+v.operator+'</td><td>'+v.port+' &middot; '+v.eta+'</td><td>'+v.fuel+' / '+v.qty.toLocaleString()+' MT</td><td>'+v.score+'</td><td style="font-weight:700;color:'+(v.eligibility==='eligible'?'#006630':v.eligibility==='blocked'?'#CC1010':'#0055CC')+'">'+v.eligibility.toUpperCase()+'</td><td>$'+v.commission.toLocaleString()+'</td><td style="font-size:9px">'+v.reason+'</td></tr>';
+  }).join('');
+  var h='<!DOCTYPE html><html><head><meta charset="utf-8"><title>ACO Energies Deal Origination Report</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Courier New,monospace;font-size:11px;padding:20px 28px;color:#111}.hdr{display:flex;align-items:center;gap:16px;padding-bottom:10px;border-bottom:3px solid #0D2040;margin-bottom:12px}.brand{font-size:22px;font-weight:bold;color:#0D2040;letter-spacing:3px}h2{font-size:11px;background:#0D2040;color:#fff;padding:5px 10px;margin:10px 0 6px;letter-spacing:.1em}.kpis{display:flex;gap:7px;margin-bottom:10px;flex-wrap:wrap}.kpi{border:1px solid #ddd;border-left:4px solid #0D2040;padding:7px 9px;flex:1;min-width:90px;border-radius:2px}.kv{font-size:15px;font-weight:bold;color:#0D2040;line-height:1}.kl{font-size:8px;color:#777;margin-bottom:2px}.ks{font-size:8px;color:#444;margin-top:2px}table{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:10px}th{background:#0D2040;color:#fff;padding:5px 7px;text-align:left;font-size:9px}td{padding:4px 7px;border-bottom:1px solid #eee}.action{background:#e8fff4;border:2px solid #006630;padding:9px;border-radius:2px;margin:10px 0;font-size:10px}.ft{margin-top:12px;padding-top:8px;border-top:1px solid #ddd;font-size:8px;color:#777;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px}@media print{body{padding:14px 20px}}</style></head><body>';
+
+h+=’<div class="hdr"><div class="brand">⚓ ACO ENERGIES</div><div style="margin-left:12px"><div style="font-size:12px;color:#0D2040;font-weight:bold">Deal Origination Dashboard · Minerva Brokerage Report</div><div style="font-size:9px;color:#777">CONFIDENTIAL · ‘+now.toLocaleDateString(‘en-GB’,{weekday:‘long’,day:‘numeric’,month:‘long’,year:‘numeric’})+’ · Cairo · Agreement ACO-MIN-EGY-2026</div></div><div style="margin-left:auto;text-align:right;font-size:9px;color:#666">Exclusive Minerva Broker<br>Egypt · Suez Canal · Red Sea</div></div>’;
+h+=’<div class="kpis"><div class="kpi" style="border-left-color:#006630"><div class="kl">ELIGIBLE STEMS</div><div class="kv" style="color:#006630">’+elig.length+’</div><div class="ks">Score ≥65 · Unknown to Minerva</div></div><div class="kpi" style="border-left-color:#CC1010"><div class="kl">BLOCKED</div><div class="kv" style="color:#CC1010">’+vessels.filter(function(v){return v.eligibility===“blocked”;}).length+’</div><div class="ks">Minerva direct</div></div><div class="kpi"><div class="kl">EST. COMMISSION</div><div class="kv">$’+tc.toLocaleString()+’</div><div class="ks">At $2/MT</div></div><div class="kpi" style="border-left-color:#CC6600"><div class="kl">EXCLUSION DB</div><div class="kv" style="color:#CC6600">108</div><div class="ks">Names loaded</div></div></div>’;
+h+=’<div class="action"><strong>🎯 ELIGIBLE STEMS — SEND TO MINERVA NOW:</strong> ‘+( elig.map(function(v){return v.name+’ (’+v.operator+’ · ‘+v.fuel+’ ‘+v.qty.toLocaleString()+‘MT · $’+v.commission.toLocaleString()+’)’}).join(’ | ‘)||‘None’ )+’</div>’;
+h+=’<h2>⚓ FULL VESSEL PIPELINE</h2><p style="font-size:9px;color:#666;margin-bottom:6px">GREEN = Eligible · RED = Blocked (Minerva direct) · BLUE = Validate first</p>’;
+h+=’<table><tr><th>Vessel</th><th>IMO</th><th>Operator</th><th>Port · ETA</th><th>Fuel · Qty</th><th>Score</th><th>Status</th><th>Commission</th><th>Notes</th></tr>’+rows+’</table>’;
+h+=’<h2>🚫 MINERVA EXCLUSION DATABASE</h2><div style="display:flex;flex-wrap:wrap;gap:4px">’;
+MINERVA_DIRECT.forEach(function(d){h+=’<span style="background:#ffe0e0;border:1px solid rgba(200,0,0,.2);border-radius:2px;padding:2px 5px;font-size:8px;color:#CC1010">’+d+’</span>’;});
+h+=’</div><div class="ft"><div>Agreement: ACO-MIN-EGY-2026 · Commission: $2/MT · Ports: Port Said, Suez, Alexandria, Damietta, Sokhna</div><div><strong>ACO ENERGIES · Minerva Brokerage · CONFIDENTIAL</strong> · ‘+now.toLocaleString()+’</div></div>’;
+h+=’<scr’+‘ipt>setTimeout(function(){window.print();},400);</sc’+‘ript></body></html>’;
+var blob=new Blob([h],{type:‘text/html’});
+var url=URL.createObjectURL(blob);
+window.open(url,’_blank’);
+setTimeout(function(){URL.revokeObjectURL(url);},10000);
 }
 
-function switchTab(name) {
-  console.log("Switching tab:", name);
-}
-
-function filterTable(mode) {
-  console.log("Filtering:", mode);
-}
-
-function searchTable() {
-  console.log("Search working");
-}
-
-function sortTable() {
-  console.log("Sort working");
-}
-
-/* ===== CONFIRM LOADED ===== */
-
-console.log("CORE FUNCTIONS LOADED");
+/* INIT */
+document.getElementById(‘kpi-excl’).textContent = MINERVA_DIRECT.size;
+document.getElementById(‘tk-excl’).textContent = MINERVA_DIRECT.size + ’ NAMES EXCLUDED’;
+renderExcl();
+doRefresh();
 </script>
+
+</body>
+</html>
